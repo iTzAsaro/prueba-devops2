@@ -87,8 +87,8 @@ Para este encargo se seleccionó formalmente el modelo **GitFlow**, tras un aná
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/<tu-usuario-o-org>/<tu-repositorio>.git
-cd <tu-repositorio>
+git clone https://github.com/iTzAsaro/prueba-devops1.git
+cd prueba-devops1
 git checkout develop
 ```
 
