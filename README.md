@@ -163,6 +163,8 @@ docker-compose down
 | **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job de despliegue continuo en GitHub Actions con etiquetado semántico y commit SHA. | ⏳ En configuración |
 | **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con dependencias ordenadas por `condition: service_healthy` y red bridge aislada. | ⏳ En configuración |
 
+> 📸 **Evidencias Gráficas:** Consulta el informe visual de métricas de seguridad y ejecución de pipeline en [**`docs/EVIDENCIAS_SONARCLOUD_Y_CI.md`**](./docs/EVIDENCIAS_SONARCLOUD_Y_CI.md).
+
 ---
 
 ## 🤖 Declaración de Uso Ético de Inteligencia Artificial
