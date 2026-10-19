@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2026 Kevin Gallardo, Alexsander Rosales, Paulo Rivas
+Copyright (c) 2026 Alexsander Rosales, Abner, Paulo Rivas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

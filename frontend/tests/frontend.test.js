@@ -3,7 +3,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 
-describe('Pruebas Unitarias del Módulo Frontend - VI CITY (Kevin Gallardo)', () => {
+describe('Pruebas Unitarias del Módulo Frontend - VI CITY (Abner)', () => {
   const rootDir = path.resolve(__dirname, '..');
 
   test('Debe existir package.json con scripts de test y start', () => {

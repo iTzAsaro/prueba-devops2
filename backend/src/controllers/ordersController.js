@@ -12,8 +12,8 @@ let ordersDb = [
     createdAt: new Date('2026-09-01T14:30:00Z').toISOString(),
     status: 'confirmada',
     customer: {
-      fullName: 'Kevin Gallardo',
-      email: 'kevin.gallardo@duocuc.cl',
+      fullName: 'Usuario Demo',
+      email: 'usuario.demo@duocuc.cl',
       phone: '+56911223344'
     },
     selection: {

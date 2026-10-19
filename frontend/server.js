@@ -42,5 +42,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`[Frontend] Servidor web iniciado en http://localhost:${PORT}`);
-  console.log(`[Frontend] Desarrollado por Kevin Gallardo`);
+  console.log(`[Frontend] Plataforma VI CITY - Módulo Frontend`);
 });

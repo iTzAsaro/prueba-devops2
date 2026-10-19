@@ -15,7 +15,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/
 
 ---
 
-## [1.0.0] - 2026-09-03 (Línea Base — Evaluación Parcial N°1)
+## [1.0.0] - 2026-09-03 (Línea Base — Versión Inicial del Microservicio)
 ### Añadido
 - Inicialización del repositorio y arquitectura modular Frontend/Backend.
 - Módulo Frontend (SPA vanilla con ES Modules).

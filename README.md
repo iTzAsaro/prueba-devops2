@@ -95,7 +95,7 @@ flowchart TD
 │   ├── .dockerignore            # Exclusión de temporales y logs
 │   ├── package.json             # Scripts y metadatos
 │   └── README.md                # Documentación de endpoints
-├── frontend/                    # Cliente Web SPA Dark HUD (Abner / Kevin Gallardo)
+├── frontend/                    # Cliente Web SPA Dark HUD (Abner)
 │   ├── public/                  # Shell HTML e iconos
 │   ├── src/                     # Componentes, vistas SPA, catálogo y store
 │   ├── tests/
