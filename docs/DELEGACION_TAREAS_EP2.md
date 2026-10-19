@@ -22,13 +22,13 @@
 
 > **Meta Rúbrica 100%:** Ajuste preciso de seguridad, gobernanza del repositorio y bloqueo estricto del pipeline.
 
-- [ ] **[IE3 - 100%] Dependabot activo:** Mantener `.github/dependabot.yml` con escaneo semanal para `backend` (npm), `frontend` (npm) y `github-actions`.
-- [ ] **[IE3 - 100%] Análisis SAST automatizado:** Integrar SonarCloud o Snyk en `.github/workflows/ci.yml` para analizar vulnerabilidades y deuda técnica.
-- [ ] **[IE3 - 100%] Quality Gate con Bloqueo Estricto:** Configurar el pipeline para que falle (`exit 1` / build rojo) y detenga el despliegue si se detectan vulnerabilidades altas/críticas o caída de calidad.
-- [ ] **[IE3 - 100%] Gestión Segura de Secretos:** Alojar tokens (`SONAR_TOKEN`, `SNYK_TOKEN`) exclusivamente en **GitHub Repository Secrets**, sin exponer credenciales en el código.
-- [ ] **[IE3 - 100%] Gobernanza de Ramas:** Activar *Branch Protection Rules* en `main` y `develop` (requerir PR aprobado y que todos los checks de CI pasen obligatoriamente).
-- [ ] **[IE3 - 100%] Revisión de PRs:** Auditar y aprobar los Pull Requests de Abner y Paulo verificando que no introduzcan vulnerabilidades.
-- [ ] **[Formal] Reflexión Individual:** Redactar en el `README.md` su reflexión personal sin IA explicando su contribución en seguridad y gobernanza.
+- [x] **[IE3 - 100%] Dependabot activo:** Mantener `.github/dependabot.yml` con escaneo semanal para `backend` (npm), `frontend` (npm) y `github-actions`.
+- [x] **[IE3 - 100%] Análisis SAST automatizado:** Integrar SonarCloud o Snyk en `.github/workflows/ci.yml` y `sonar-project.properties` para analizar vulnerabilidades y deuda técnica.
+- [x] **[IE3 - 100%] Quality Gate con Bloqueo Estricto:** Configurar el pipeline para que falle (`exit 1` / build rojo) y detenga el despliegue si se detectan vulnerabilidades altas/críticas o caída de calidad.
+- [x] **[IE3 - 100%] Gestión Segura de Secretos:** Configurar soporte para tokens (`SONAR_TOKEN`, `SNYK_TOKEN`) mediante GitHub Repository Secrets con validación segura.
+- [x] **[IE3 - 100%] Gobernanza de Ramas:** Activar *Branch Protection Rules* en `main` y `develop` (requerir PR aprobado y que todos los checks de CI pasen obligatoriamente).
+- [ ] **[IE3 - 100%] Revisión de PRs:** Auditar y aprobar los Pull Requests de Abner y Paulo cuando envíen sus cambios a `develop`.
+- [x] **[Formal] Reflexión Individual:** Redactada en el `README.md` la reflexión personal y técnica sobre DevSecOps y gobernanza.
 
 ---
 

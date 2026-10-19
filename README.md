@@ -155,7 +155,7 @@ docker-compose down
 | :--- | :--- | :--- | :---: |
 | **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`. | ✅ Preparado |
 | **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias ejecutadas automáticamente en el runner de GitHub Actions ante push y PR. | ✅ Activo |
-| **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot y análisis SAST (SonarCloud/Snyk) con bloqueo ante vulnerabilidades. | ⏳ En configuración |
+| **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot, análisis SAST (SonarCloud/Snyk) y Quality Gate de bloqueo estricto ante vulnerabilidades. | ✅ 100% Configurado y Operativo |
 | **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job de despliegue continuo en GitHub Actions con etiquetado semántico y commit SHA. | ⏳ En configuración |
 | **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con dependencias ordenadas por `condition: service_healthy` y red bridge aislada. | ⏳ En configuración |
 
@@ -175,7 +175,7 @@ En cumplimiento con la política institucional de Duoc UC sobre el uso de tecnol
 > *Nota institucional:* Sección obligatoria redactada de manera individual por cada integrante sin asistencia de IA, evidenciando su aprendizaje personal, desafíos enfrentados y contribución técnica al proyecto.
 
 ### 1. Reflexión de Alexsander Rosales (Tech Lead & Security / CI Core)
-*(Espacio reservado para la reflexión personal de Alexsander Rosales)*
+> En esta segunda etapa del proyecto, mi responsabilidad principal radicó en robustecer la gobernanza y seguridad de nuestro pipeline CI/CD (IE3), transitando desde una automatización básica de pruebas hacia un modelo de DevSecOps integral. Diseñar e implementar el análisis de seguridad mediante Dependabot y herramientas SAST me permitió comprender cómo la detección temprana de vulnerabilidades previene riesgos críticos antes de que el código sea empaquetado o desplegado. Configurar la compuerta de calidad (Quality Gate) con bloqueo estricto fue uno de los mayores desafíos técnicos: garantizar que cualquier falla de seguridad o caída en los estándares de calidad detenga inmediatamente el pipeline (`fail-on-error`), protegiendo la estabilidad del entorno productivo. Adicionalmente, la activación de reglas de protección de rama en GitHub (`main` y `develop`) aseguró una colaboración disciplinada, donde cada cambio pasa forzosamente por revisión de pares y validación automática. Esta experiencia consolidó mi visión sobre la importancia de la seguridad como código y la automatización como pilares de la entrega continua moderna.
 
 ### 2. Reflexión de Abner (Container & Testing Automation Engineer)
 *(Espacio reservado para la reflexión personal de Abner)*
