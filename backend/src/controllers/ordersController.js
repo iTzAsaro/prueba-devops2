@@ -1,6 +1,7 @@
 // Controlador de Preventas y Métricas de Negocio (Órdenes VI CITY)
 // Responsable: Alexsander Rosales (Backend Developer)
 
+const crypto = require('crypto');
 const catalog = require('../data/catalog');
 const { sendJson, sendError, parseJsonBody } = require('../utils/response');
 
@@ -144,7 +145,7 @@ async function createOrder(req, res) {
     const shipping = format === 'physical' ? 4990 : 0;
     const total = basePrice + extrasTotal + shipping;
 
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const randomSuffix = crypto.randomInt(1000, 10000);
     const orderNumber = `VC-2026-${randomSuffix}`;
     const newOrder = {
       id: `ord-${Date.now()}`,

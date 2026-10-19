@@ -187,7 +187,10 @@ export function icalDownload({ title, start, end, description = '' }) {
 
 // ===== Misc =====
 export function uid(prefix = 'ORD') {
-  return `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.random().toString(36).toUpperCase().slice(-3)}`;
+  const rand = (typeof crypto !== 'undefined' && crypto.getRandomValues)
+    ? (crypto.getRandomValues(new Uint32Array(1))[0] % 1000).toString().padStart(3, '0')
+    : Date.now().toString().slice(-3);
+  return `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}${rand}`;
 }
 
 export function formatDate(d, opts = { year: 'numeric', month: '2-digit', day: '2-digit' }) {

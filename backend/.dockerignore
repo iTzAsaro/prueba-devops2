@@ -1,4 +1,7 @@
 node_modules
+.git
+.github
+*.md
+tests
 npm-debug.log
 .DS_Store
-tests

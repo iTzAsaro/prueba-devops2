@@ -22,14 +22,23 @@ const server = http.createServer((req, res) => {
   // Limpiar query params si los hay
   relativePath = relativePath.split('?')[0];
 
-  let filePath = path.join(PUBLIC_DIR, relativePath);
+  // Sanitización estricta contra Path Traversal
+  const safeSuffix = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+  let filePath = path.resolve(PUBLIC_DIR, safeSuffix);
 
-  // Si no está en public, buscar en src
-  if (!fs.existsSync(filePath)) {
-    filePath = path.join(SRC_DIR, relativePath);
+  // Asegurar que no se escape de los directorios permitidos
+  const isInsidePublic = filePath.startsWith(PUBLIC_DIR);
+  const isInsideSrc = filePath.startsWith(SRC_DIR);
+
+  if (!isInsidePublic || !fs.existsSync(filePath)) {
+    filePath = path.resolve(SRC_DIR, safeSuffix);
   }
 
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+  const validPath = (filePath.startsWith(PUBLIC_DIR) || filePath.startsWith(SRC_DIR)) &&
+                    fs.existsSync(filePath) &&
+                    fs.statSync(filePath).isFile();
+
+  if (validPath) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'text/plain';
     res.writeHead(200, { 'Content-Type': contentType });

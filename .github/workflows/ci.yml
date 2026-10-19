@@ -33,7 +33,7 @@ jobs:
 
       - name: Instalar dependencias del ${{ matrix.module }}
         working-directory: ./${{ matrix.module }}
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Ejecutar Suite de Pruebas Unitarias (${{ matrix.module }})
         working-directory: ./${{ matrix.module }}
@@ -46,6 +46,8 @@ jobs:
     name: Escaneo de Seguridad SAST & Quality Gate
     runs-on: ubuntu-latest
     needs: [unit-tests]
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout del código fuente
         uses: actions/checkout@v4
@@ -72,14 +74,14 @@ jobs:
 
       # 2. Análisis Estático de Código (SAST) con SonarCloud o Snyk
       - name: Análisis SAST con SonarCloud / SonarScanner
-        if: env.SONAR_TOKEN != ''
+        if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Verificación SAST Local de Calidad (Fallback seguro)
-        if: env.SONAR_TOKEN == ''
+        if: ${{ env.SONAR_TOKEN == '' }}
         run: |
           echo "ℹ️ Analizando sintaxis, patrones y mejores prácticas de seguridad en el código..."
           node -c backend/src/server.js
