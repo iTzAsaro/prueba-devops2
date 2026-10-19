@@ -1,169 +1,184 @@
-# Microservicio DevOps - Evaluación Parcial N°1
+# Microservicio DevOps — Evaluación Parcial N°2: Añadiéndole Complejidad a Nuestro Pipeline
 
-Repositorio base para la construcción del pipeline DevOps (DOY0101 - Ingeniería DevOps, Duoc UC).  
-Este proyecto implementa una arquitectura modular con cliente Frontend, microservicio Backend y automatización de Integración Continua (CI) en la nube mediante GitHub Actions.
+> **Asignatura:** DOY0101 - Ingeniería DevOps  
+> **Institución:** Duoc UC  
+> **Evaluación:** Evaluación Parcial 2 (45% ponderación)  
+> **Estado:** Base técnica configurada y lista para despliegue de pipeline CI/CD
 
 ---
 
 ## 👥 Equipo de Trabajo y Roles
 
-| Integrante | Rol | Responsabilidad Principal |
-| :--- | :--- | :--- |
-| **Kevin Gallardo** | **Frontend Developer** | Desarrollo de la interfaz de usuario en `frontend/`, consumo de endpoints de API y ejecución de cambios tipo Feature y Hotfix. |
-| **Alexsander Rosales** | **Backend Developer** | Desarrollo del microservicio API REST en `backend/`, manejo de lógica de negocio, persistencia y simulación de Feature. |
-| **Paulo Rivas** | **DevOps Engineer** | Diseño del repositorio, gobernanza de ramas, configuración de pipeline CI/CD en GitHub Actions y documentación técnica. |
+| Integrante | Rol en el Proyecto | Responsabilidad Principal en EP2 | Indicadores de Evaluación |
+| :--- | :--- | :--- | :--- |
+| **Alexsander Rosales** | **Tech Lead & Security / CI Pipeline Core** | Orquestación del pipeline GitHub Actions, configuración de Dependabot, integración de análisis SAST (SonarCloud/Snyk), Quality Gates de bloqueo estricto y revisión de PRs. | **IE3 (Seguridad & Calidad)** |
+| **Abner** | **Container & Testing Automation Engineer** | Optimización de `Dockerfile` con Multi-Stage builds, usuario no privilegiado (`USER node`), `.dockerignore`, suite de pruebas unitarias y reportes de cobertura en CI. | **IE1 (Docker) & IE2 (Testing)** |
+| **Paulo Rivas** | **DevOps & Orchestration Engineer** | Orquestación con `docker-compose.yml` (redes dedicadas, volúmenes, healthchecks), job de despliegue continuo (CD) en entorno simulado con trazabilidad y documentación técnica. | **IE4 (Despliegue) & IE5 (Orquestación)** |
 
 ---
 
-## 🎯 Propósito del Proyecto
-El objetivo del proyecto es establecer las bases de trabajo colaborativo y control de versiones para el ciclo de vida del software, demostrando:
-1. Adopción rigurosa de flujos de trabajo ramificados en la nube.
-2. Trazabilidad completa de cambios colaborativos mediante *Pull Requests* y revisiones de código.
-3. Automatización de pruebas, sintaxis y validaciones a través de un pipeline de CI en un entorno cloud simulado (GitHub Actions).
-4. Cumplimiento de estándares y convenciones de la industria (Conventional Commits, GitFlow, documentación abierta).
+## 🎯 Propósito del Proyecto (EP2)
+
+El encargo de la **Evaluación Parcial N°2** consiste en elevar la madurez del ciclo de vida del microservicio (*Plataforma de Preventas VI CITY*) mediante la implementación de un **pipeline CI/CD integral y robusto en GitHub Actions**, garantizando:
+
+1. **Contenerización eficiente (IE1):** Construcción de imágenes Docker seguras, reproducibles y de tamaño reducido mediante *Multi-Stage Builds*.
+2. **Pruebas Automatizadas en CI (IE2):** Ejecución desatendida de suites unitarias y generación de reportes de cobertura ante cada integración.
+3. **Seguridad y Gobernanza (IE3):** Detección proactiva de vulnerabilidades con Dependabot, análisis estático de código (SAST) y **bloqueo estricto del pipeline (Quality Gate)** en caso de no conformidades.
+4. **Despliegue Automático y Trazabilidad (IE4):** Automatización de la fase de CD en un entorno simulado, vinculando cada artefacto con su commit SHA y tag de versión.
+5. **Orquestación Resiliente (IE5):** Configuración de un clúster local de servicios con Docker Compose, definiendo dependencias ordenadas por `healthcheck` y aislamiento de redes.
 
 ---
 
-## 🌿 Justificación del Modelo de Ramificación (IE1)
+## 🏗️ Arquitectura del Pipeline CI/CD
 
-Para este encargo se seleccionó formalmente el modelo **GitFlow**, tras un análisis comparativo frente a alternativas como **Trunk-Based Development** y **GitHub Flow**:
+```mermaid
+flowchart TD
+    subgraph Trigger ["Disparadores de Eventos"]
+        Push[Push a develop] --> Pipeline
+        PR[Pull Request a main] --> Pipeline
+    end
 
-### Comparativa de Modelos
-* **Trunk-Based Development:**
-  * *Mecanismo:* Todos los desarrolladores envían cambios frecuentemente directo o mediante ramas muy efímeras hacia la rama principal (`main`/`trunk`).
-  * *Ventajas:* Máxima velocidad, minimiza conflictos de integración prolongados, excelente para equipos senior con pruebas automatizadas maduras.
-  * *Desventaja en este contexto:* Al no contar con barreras intermedias de estabilización, cualquier commit defectuoso puede comprometer inmediatamente el entorno productivo si no existen *feature flags* consolidados.
-* **GitHub Flow:**
-  * *Mecanismo:* Basado en una única rama permanente (`main`) y ramas `feature` cortas que se despliegan directamente a producción tras la aprobación del PR.
-  * *Ventajas:* Simple y ágil para despliegues continuos (CD).
-  * *Desventaja en este contexto:* No contempla de manera nativa la separación formal entre un ciclo de estabilización pre-entrega y la corrección urgente y aislada de fallos en producción.
-* **GitFlow (Modelo Seleccionado):**
-  * *Mecanismo:* Emplea dos ramas de vida infinita (`main` y `develop`), y ramas auxiliares estrictamente tipificadas (`feature/*`, `hotfix/*`, `release/*`).
-  * *Justificación de Selección:*
-    1. **Aislamiento por capas:** Permite a Kevin (Frontend) y Alexsander (Backend) trabajar en funcionalidades paralelas (`feature/*`) sin afectar el código que está listo para entrega ni bloquear el trabajo mutuo.
-    2. **Ambiente de Integración (`develop`):** Proporciona un entorno controlado donde probar la integración de ambos subsistemas antes de pasar a producción (`main`).
-    3. **Respuesta Rápida y Segura a Incidentes (`hotfix/*`):** Permite corregir fallos críticos directamente desde `main` y propagar la solución simultáneamente hacia `develop`, garantizando consistencia absoluta en el historial.
+    subgraph Pipeline ["GitHub Actions CI/CD Pipeline (.github/workflows/ci.yml)"]
+        subgraph Stage1 ["Fase 1: Testing & Cobertura (IE2)"]
+            T1["Test Backend (Node test runner)"]
+            T2["Test Frontend (Node test runner)"]
+        end
+
+        subgraph Stage2 ["Fase 2: Seguridad & SAST (IE3)"]
+            Sec1["Dependabot (Escaneo dependencias)"]
+            Sec2["SonarCloud / Snyk (Análisis SAST)"]
+            QG{"Quality Gate:\n¿Cumple métricas de seguridad?"}
+            Sec2 --> QG
+        end
+
+        subgraph Stage3 ["Fase 3: Contenerización (IE1)"]
+            B1["Build Dockerfile Backend (Multi-stage)"]
+            B2["Build Dockerfile Frontend (Multi-stage)"]
+        end
+
+        subgraph Stage4 ["Fase 4: Despliegue & Orquestación (IE4 & IE5)"]
+            CD["Simulación de Despliegue CD"]
+            DC["Levantamiento con docker-compose"]
+            HC["Verificación de Healthcheck (/api/health)"]
+            CD --> DC --> HC
+        end
+
+        Stage1 --> Stage2
+        QG -- Superado --> Stage3
+        QG -- Falló --> Fail["🛑 Pipeline Bloqueado / Alerta de Seguridad"]
+        Stage3 --> Stage4
+    end
+
+    HC --> Success(["🚀 Despliegue Validado & Trazable"])
+```
 
 ---
 
-## 🏗️ Arquitectura y Estructura de Carpetas (IE5)
+## 📂 Estructura del Repositorio
 
 ```text
 ├── .github/
+│   ├── dependabot.yml           # Escaneo semanal de dependencias npm y actions (IE3)
 │   └── workflows/
-│       └── ci.yml               # Configuración del pipeline CI en GitHub Actions
-├── frontend/                    # Cliente web / Interfaz de usuario (Kevin Gallardo)
-│   ├── public/
-│   │   └── index.html           # Vista principal del microservicio
+│       └── ci.yml               # Pipeline CI/CD automatizado con Quality Gate (IE1-IE4)
+├── docs/
+│   └── EP2_DOY0101_Estudiante.pdf # Enunciado y rúbrica oficial de la evaluación
+├── backend/                     # Microservicio API REST (Alexsander Rosales)
 │   ├── src/
-│   │   ├── app.js               # Lógica del cliente y consumo de API
-│   │   └── style.css            # Estilos y componentes visuales
+│   │   ├── controllers/         # Controladores de catálogo y órdenes
+│   │   ├── middleware/          # CORS y logger HTTP estructurado
+│   │   ├── router.js            # Enrutador REST nativo
+│   │   └── server.js            # Servidor HTTP con healthcheck y métricas
 │   ├── tests/
-│   │   └── frontend.test.js     # Pruebas automatizadas de interfaz
-│   ├── package.json             # Scripts de inicio, test y dependencias
-│   └── README.md                # Guía de ejecución del frontend
-├── backend/                     # Servidor API / Lógica de negocio (Alexsander Rosales)
-│   ├── src/
-│   │   └── server.js            # Servidor HTTP / Endpoints REST
+│   │   └── backend.test.js      # 10 Pruebas unitarias nativas (Node test runner)
+│   ├── Dockerfile               # Contenerización Multi-Stage (Abner)
+│   ├── .dockerignore            # Exclusión de temporales y logs
+│   ├── package.json             # Scripts y metadatos
+│   └── README.md                # Documentación de endpoints
+├── frontend/                    # Cliente Web SPA Dark HUD (Abner / Kevin Gallardo)
+│   ├── public/                  # Shell HTML e iconos
+│   ├── src/                     # Componentes, vistas SPA, catálogo y store
 │   ├── tests/
-│   │   └── backend.test.js      # Pruebas unitarias de endpoints
-│   ├── package.json             # Scripts de servidor y dependencias
-│   └── README.md                # Guía de ejecución del backend
-├── .gitignore                   # Exclusión de binarios, dependencias y logs
-├── CHANGELOG.md                 # Historial de versiones y entregas
-├── CODE_OF_CONDUCT.md           # Normas de convivencia del equipo
-├── CONTRIBUTING.md              # Estándares de commit, ramas y PRs
-├── LICENSE.md                   # Licencia de código abierto MIT
-└── README.md                    # Documentación principal del encargo
+│   │   └── frontend.test.js     # 9 Pruebas unitarias nativas de interfaz
+│   ├── Dockerfile               # Contenerización Multi-Stage
+│   ├── .dockerignore            # Exclusión de dependencias
+│   ├── package.json             # Scripts de interfaz
+│   └── README.md                # Documentación del cliente
+├── docker-compose.yml           # Orquestación de servicios con healthchecks y redes (Paulo Rivas)
+├── CHANGELOG.md                 # Registro semántico de versiones (Keep a Changelog)
+├── CODE_OF_CONDUCT.md           # Normas de conducta y colaboración
+├── CONTRIBUTING.md              # Convenciones de GitFlow, commits y PRs
+├── LICENSE.md                   # Licencia MIT
+└── README.md                    # Este documento maestro
 ```
 
 ---
 
-## ⚙️ Instrucciones de Instalación y Ejecución
+## ⚙️ Ejecución y Pruebas Locales
 
 ### Requisitos Previos
-* [Node.js](https://nodejs.org/) v18+ o superior instalado.
-* [Git](https://git-scm.com/) configurado en el sistema local.
+* [Node.js](https://nodejs.org/) v18+ (LTS recomendado).
+* [Docker](https://www.docker.com/) y Docker Compose instalados.
+* [Git](https://git-scm.com/) configurado localmente.
 
-### 1. Clonar el repositorio
+### 1. Ejecución de Pruebas Unitarias
+Ambas suites utilizan el motor nativo de pruebas de Node.js, ejecutándose sin dependencias pesadas:
 ```bash
-git clone https://github.com/iTzAsaro/prueba-devops1.git
-cd prueba-devops1
-git checkout develop
-```
-
-### 2. Ejecutar y Probar el Frontend (Kevin Gallardo)
-```bash
-cd frontend
-# Ejecutar suite de pruebas
-npm test
-# Iniciar servidor local
-npm start
-```
-Abrir el navegador web en `http://localhost:5000` (o abrir directamente `frontend/public/index.html`).
-
-### 3. Ejecutar y Probar el Backend (Alexsander Rosales)
-```bash
+# Probar el microservicio Backend (10 pruebas)
 cd backend
-# Ejecutar suite de pruebas
 npm test
-# Iniciar servidor del microservicio
-npm start
+
+# Probar la interfaz Frontend (9 pruebas)
+cd ../frontend
+npm test
 ```
-El servidor backend escuchará peticiones en `http://localhost:3000/api`.
+
+### 2. Levantamiento con Docker Compose (Orquestación Local)
+Para construir y levantar el stack completo en una red aislada con healthchecks activos:
+```bash
+docker-compose up --build -d
+```
+* **Frontend:** Disponible en `http://localhost:5000`
+* **Backend API:** Disponible en `http://localhost:3000/api`
+* **Healthcheck:** Verificar estado en `http://localhost:3000/api/health`
+
+Para detener los servicios:
+```bash
+docker-compose down
+```
 
 ---
 
-## 🚀 Flujo DevOps y Automatización CI/CD (IE3 & IE4)
+## 📊 Matriz de Cumplimiento de Rúbrica (IE1 a IE5)
 
-### Rol de GitHub Actions en los procesos CI/CD
-El archivo [`.github/workflows/ci.yml`](.github/workflows/ci.yml) implementa la etapa de **Integración Continua (CI)** en un entorno Cloud simulado proporcionado por los ejecutores virtuales (*runners*) de GitHub (`ubuntu-latest`).
-
-* **¿Por qué es fundamental en DevOps?**
-  1. **Detección temprana de errores (*Shift-Left Testing*):** Cada vez que un desarrollador sube código a `develop`, el pipeline compila y ejecuta las pruebas de frontend y backend, evitando que bugs alcancen etapas avanzadas.
-  2. **Control de calidad antes de producción:** Al abrir un *Pull Request* hacia la rama `main`, la ejecución del workflow actúa como una compuerta de calidad (*quality gate*); si el pipeline falla, el merge queda automáticamente bloqueado.
-  3. **Trazabilidad:** Genera un registro inmutable en la nube de cada versión validada con su commit y autor correspondiente.
-
-### Eventos Disparadores (*Triggers*)
-* **`push` a la rama `develop`:** Valida la integración automática de cada nueva funcionalidad.
-* **`pull_request` a la rama `main`:** Certifica que el código destinado a producción es 100% estable y pasó todas las pruebas.
-
----
-
-## 📋 Bitácora de Trazabilidad Colaborativa (IE2)
-
-La evaluación requiere evidenciar al menos 2 cambios tipo Feature y 1 tipo Hotfix mediante Pull Requests:
-
-| Identificador | Tipo | Rama Origen | Rama Destino | Autor | Descripción del Cambio |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **PR #1** | Feature | `feature/backend-api-endpoints` | `develop` | Alexsander Rosales | Implementación de endpoints REST y healthcheck del microservicio. |
-| **PR #2** | Feature | `feature/frontend-dashboard` | `develop` | Kevin Gallardo | Integración de panel de control interactivo para visualización del microservicio. |
-| **PR #3** | Hotfix | `hotfix/fix-client-cors-error` | `main` y `develop` | Kevin Gallardo / Paulo Rivas | Corrección urgente de excepción de conexión cruzada detectada en producción. |
-
----
-
-## 📖 Convenciones y Guía de Buenas Prácticas (IE5)
-Para consultar en detalle las normas de nombrado de ramas, el formato de mensajes de commit ([Conventional Commits](https://www.conventionalcommits.org/)) y la política de revisión de código, remitirse al documento:
-👉 **[`CONTRIBUTING.md`](./CONTRIBUTING.md)**
+| Indicador | Requisito Duoc UC | Implementación en este Repositorio | Estado |
+| :--- | :--- | :--- | :---: |
+| **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`. | ✅ Preparado |
+| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias ejecutadas automáticamente en el runner de GitHub Actions ante push y PR. | ✅ Activo |
+| **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot y análisis SAST (SonarCloud/Snyk) con bloqueo ante vulnerabilidades. | ⏳ En configuración |
+| **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job de despliegue continuo en GitHub Actions con etiquetado semántico y commit SHA. | ⏳ En configuración |
+| **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con dependencias ordenadas por `condition: service_healthy` y red bridge aislada. | ⏳ En configuración |
 
 ---
 
 ## 🤖 Declaración de Uso Ético de Inteligencia Artificial
-En cumplimiento de las directrices académicas institucionales de Duoc UC:
-* **Herramientas utilizadas:** Asistente de IA (Gemini / Antigravity CLI).
-* **Alcance del uso:** Apoyo en la diagramación de flujos, estructura de plantillas de documentación en Markdown y generación de esqueletos base de código.
-* **Autoría y validación:** Todos los análisis técnicos, diseño de arquitectura GitFlow, implementación de componentes y reflexiones fueron revisados, validados y adoptados de manera propia por el equipo de estudiantes.
+
+En cumplimiento con la política institucional de Duoc UC sobre el uso de tecnologías generativas:
+* **Herramientas empleadas:** Antigravity CLI / Asistente IA.
+* **Finalidad:** Asistencia técnica en la redacción estructurada de plantillas de documentación, diseño de diagramas Mermaid y optimización de sintaxis en flujos YAML de GitHub Actions.
+* **Autoría y Responsabilidad:** La arquitectura del pipeline, la configuración de los contenedores, las políticas de seguridad y las decisiones técnicas fueron diseñadas, verificadas y asumidas íntegramente por el equipo de estudiantes.
 
 ---
 
 ## ✍️ Reflexiones Individuales de Aprendizaje (Obligatorias)
-*(Sección redactada individualmente por cada integrante sin intervención de IA, detallando su aprendizaje personal y contribución).*
 
-### 1. Reflexión de Kevin Gallardo (Frontend Developer)
-> Como Frontend Developer, mi principal desafío fue construir una plataforma de preventa inmersiva (SPA vanilla JS con ES Modules) sin frameworks ni bundlers, lo que me obligó a diseñar un router propio, un store con persistencia en LocalStorage y un design system dark HUD desde cero. La integración del flujo transaccional —customizer, checkout multi-paso con validación Luhn y dashboard de gestión— requirió un manejo de estado cuidadoso para no perder la configuración al recargar. La colaboración bajo GitFlow mediante ramas `feature/*` y Conventional Commits me permitió entregar el trabajo de forma incremental y trazable, abriendo Pull Requests hacia `develop` que pasaron las compuertas de CI. Esta experiencia consolidó mi comprensión de cómo la arquitectura modular frontend y la gobernanza de versiones se complementan para entregar valor de forma segura y colaborativa.
-> 
-### 2. Reflexión de Alexsander Rosales (Backend Developer)
-> En mi rol como Backend Developer, el principal aprendizaje radicó en diseñar un microservicio ligero, modular y resiliente que se integrara de manera transparente con el frontend y con los estándares DevOps del equipo. Implementar la API REST nativa —abarcando endpoints de observabilidad como `/api/health` y `/api/metrics`, junto con la gestión completa del ciclo de vida de preventas (`/api/orders`) y el catálogo de productos— me permitió comprender la importancia crítica de la consistencia en los contratos de datos, el manejo seguro de cabeceras CORS y el logging estructurado de peticiones HTTP. La adopción rigurosa de GitFlow mediante ramas de características (`feature/backend-api-endpoints`) y Conventional Commits facilitó una trazabilidad total del código fuente, mientras que la construcción de una suite exhaustiva de 10 pruebas unitarias e integración garantizó que cada cambio hacia `develop` pasara automáticamente las compuertas de calidad de CI/CD antes de ser integrado. Esta experiencia consolidó mi visión sobre cómo las buenas prácticas de desarrollo ágil y automatización minimizan errores en producción y potencian el trabajo colaborativo en la nube.
+> *Nota institucional:* Sección obligatoria redactada de manera individual por cada integrante sin asistencia de IA, evidenciando su aprendizaje personal, desafíos enfrentados y contribución técnica al proyecto.
 
-### 3. Reflexión de Paulo Rivas (DevOps Engineer)
-> Durante este proyecto, el desafío principal como DevOps Engineer fue orquestar el flujo de colaboración para asegurar que el trabajo en paralelo no afectara la estabilidad del código base. Al optar por GitFlow, logramos aislar las nuevas características en ramas `feature/*` e integrarlas en `develop`, brindando un entorno seguro para las pruebas. La configuración del pipeline en GitHub Actions fue clave para la Integración Continua (CI), ya que automatizó la ejecución de las suites de pruebas tanto del frontend como del backend ante cada push a `develop` y en los pull requests hacia `main`. Adicionalmente, el haber dockerizado los microservicios y levantado el entorno con `docker-compose` asegura que cualquier integrante o proceso de CI/CD trabaje bajo las mismas condiciones y dependencias, eliminando el clásico problema de "en mi máquina sí funciona". Esta práctica consolida el trabajo en equipo mediante trazabilidad, automatización y portabilidad.
+### 1. Reflexión de Alexsander Rosales (Tech Lead & Security / CI Core)
+*(Espacio reservado para la reflexión personal de Alexsander Rosales)*
+
+### 2. Reflexión de Abner (Container & Testing Automation Engineer)
+*(Espacio reservado para la reflexión personal de Abner)*
+
+### 3. Reflexión de Paulo Rivas (DevOps & Orchestration Engineer)
+*(Espacio reservado para la reflexión personal de Paulo Rivas)*

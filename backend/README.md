@@ -1,6 +1,6 @@
 # Microservicio Backend — Plataforma VI CITY (Alexsander Rosales)
 
-Módulo Backend que implementa la API REST y lógica de negocio para la plataforma de preventas VI CITY en el marco de la Evaluación Parcial N°1 de Ingeniería DevOps (DOY0101 - Duoc UC).
+Módulo Backend que implementa la API REST y lógica de negocio para la plataforma de preventas VI CITY en el marco de la Evaluación Parcial N°2 de Ingeniería DevOps (DOY0101 - Duoc UC).
 
 > Desarrollado por: **Alexsander Rosales** (Backend Developer)
 

@@ -2,7 +2,7 @@
 
 Frontend completo para una landing/tienda web de preventa de un videojuego AAA (referencia: GTA VI). Interfaz inmersiva con dark theme HUD/cinemático, navegación SPA fluida y flujo transaccional simulado de alta fidelidad.
 
-> Proyecto académico — Frontend Developer: **Kevin Gallardo** (DOY0101 - Ingeniería DevOps, Duoc UC).
+> Proyecto académico — Módulo Frontend (DOY0101 - Ingeniería DevOps, Duoc UC).
 
 ---
 

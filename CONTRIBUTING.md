@@ -5,9 +5,9 @@ Bienvenido a la guía de colaboración del proyecto. Este documento define los e
 ---
 
 ## 1. Roles y Responsabilidades
-* **Kevin Gallardo**: Frontend Developer (Diseño e integración de interfaz cliente en `frontend/`).
-* **Alexsander Rosales**: Backend Developer (Diseño de API REST, lógica de negocio en `backend/`).
-* **Paulo Rivas**: DevOps Engineer (Infraestructura Git, configuración CI/CD con GitHub Actions y gobernanza).
+* **Alexsander Rosales**: Tech Lead & Security / CI Pipeline Core (Gobernanza de CI/CD, Dependabot, análisis SAST y Quality Gates).
+* **Abner**: Container & Testing Automation Engineer (Contenerización Multi-Stage en Docker, suite de pruebas y cobertura).
+* **Paulo Rivas**: DevOps & Orchestration Engineer (Orquestación con Docker Compose, despliegue continuo CD y documentación técnica).
 
 ---
 

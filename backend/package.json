@@ -1,7 +1,7 @@
 {
   "name": "devops-microservice-backend",
   "version": "1.0.0",
-  "description": "Backend API module for DevOps evaluation (Alexsander Rosales)",
+  "description": "Backend API module for DevOps evaluation EP2 (Alexsander Rosales)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
