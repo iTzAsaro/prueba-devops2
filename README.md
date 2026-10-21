@@ -160,10 +160,24 @@ docker-compose down
 | **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`. | ✅ Preparado |
 | **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias ejecutadas automáticamente en el runner de GitHub Actions ante push y PR. | ✅ Activo |
 | **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot, análisis SAST (SonarCloud/Snyk) y Quality Gate de bloqueo estricto ante vulnerabilidades. | ✅ 100% Configurado y Operativo |
-| **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job de despliegue continuo en GitHub Actions con etiquetado semántico y commit SHA. | ⏳ En configuración |
-| **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con dependencias ordenadas por `condition: service_healthy` y red bridge aislada. | ⏳ En configuración |
+| **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job `deploy-simulated` en GitHub Actions, smoke test HTTP (`curl /api/health`), logs inmutables con `$GITHUB_SHA` y timestamp UTC. | ✅ 100% Configurado y Operativo |
+| **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con red bridge aislada (`vicity_network`), sondeo `healthcheck` y arranque sincronizado con `condition: service_healthy`. | ✅ 100% Configurado y Operativo |
 
-> 📸 **Evidencias Gráficas:** Consulta el informe visual de métricas de seguridad y ejecución de pipeline en [**`docs/EVIDENCIAS_SONARCLOUD_Y_CI.md`**](./docs/EVIDENCIAS_SONARCLOUD_Y_CI.md).
+> 📄 **Documentación y Evidencias Técnicas:**
+> * 🛡️ **Seguridad y CI (IE3 - Alex):** [**`docs/EVIDENCIAS_SONARCLOUD_Y_CI.md`**](./docs/EVIDENCIAS_SONARCLOUD_Y_CI.md)
+> * 🚀 **Despliegue y Orquestación (IE4 & IE5 - Paulo):** [**`docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md`**](./docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md)
+> * 📋 **Delegación de Tareas y Matriz Rúbrica:** [**`docs/DELEGACION_TAREAS_EP2.md`**](./docs/DELEGACION_TAREAS_EP2.md)
+
+---
+
+## 🔍 Trazabilidad y Calidad de Extremo a Extremo (IE4)
+
+Para cumplir con el estándar exigido por Duoc UC, la trazabilidad del pipeline se garantiza mediante una cadena ininterrumpida de validaciones:
+
+1. **Trazabilidad de Código a Artefacto:** Cada compilación de imagen Docker y ejecución de despliegue se vincula de forma unívoca con el hash SHA del commit (`$GITHUB_SHA`) y la rama de trabajo (`$GITHUB_REF_NAME`), evitando desalineaciones entre el código fuente auditado y los contenedores desplegados.
+2. **Puertas de Enlace de Calidad (Quality Gates):** Ningún contenedor es desplegado en el entorno simulado sin haber superado previamente las 19 pruebas unitarias automatizadas y el análisis estático SAST de SonarCloud con cero vulnerabilidades críticas o altas.
+3. **Validación Funcional en Vivo (Smoke Test):** Tras levantar los microservicios con Docker Compose, el pipeline ejecuta una prueba de humo activa verificando que el endpoint `/api/health` devuelva código `HTTP 200` y metadatos de disponibilidad válidos.
+4. **Auditoría Inmutable:** Cada paso de despliegue escribe en los logs del pipeline un registro inmutable con el commit SHA, autor, entorno y marca temporal UTC, permitiendo auditoría retrospectiva de cada versión entregada.
 
 ---
 
@@ -187,4 +201,4 @@ En cumplimiento con la política institucional de Duoc UC sobre el uso de tecnol
 *(Espacio reservado para la reflexión personal de Abner)*
 
 ### 3. Reflexión de Paulo Rivas (DevOps & Orchestration Engineer)
-*(Espacio reservado para la reflexión personal de Paulo Rivas)*
+> En esta Evaluación Parcial 2, asumí el rol de DevOps & Orchestration Engineer con foco en los indicadores IE4 (Despliegue Continuo & Trazabilidad) e IE5 (Orquestación de Contenedores). Mi principal desafío fue diseñar una arquitectura de orquestación resiliente mediante Docker Compose que superara los problemas clásicos de condiciones de carrera en el arranque de microservicios. Implementé una red aislada bridge (`vicity_network`) y configuré sondeos de salud (`healthchecks`) activos en el backend con parámetros de timeout, retries e intervalos definidos, permitiendo que el frontend dependa estrictamente del estado saludable (`condition: service_healthy`). En la arista de despliegue continuo, automaticé la fase de CD en GitHub Actions dentro de un entorno cloud simulado, donde cada ejecución valida la salud del servicio mediante smoke tests y estampa un registro inmutable de auditoría con el commit SHA (`$GITHUB_SHA`), rama y timestamp UTC. La articulación con mis compañeros Alexsander y Abner me demostró el valor práctico de DevSecOps: cómo la integración de pruebas, escaneo SAST, compuertas de calidad y empaquetado seguro sientan las bases indispensables para un despliegue trazable y confiable en producción.
