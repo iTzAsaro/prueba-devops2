@@ -50,18 +50,20 @@
 
 ## 👤 3. Paulo — Responsable de IE4 e IE5 (Despliegue & Orquestación - 40%)
 
-> **Meta Rúbrica 100%:** Despliegue automático con trazabilidad completa y orquestación resiliente multi-contenedor.
+> **Meta Rúbrica 100%:** Despliegue automático con trazabilidad completa y orquestación resiliente multi-contenedor.  
+> 📄 **Evidencias Completas:** [EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md](./EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md)
 
-- [ ] **[IE5 - 100%] Orquestación Multi-Servicio:** Definir en `docker-compose.yml` la coexistencia de `backend` y `frontend`.
-- [ ] **[IE5 - 100%] Red Aislada (Bridge Network):** Crear una red dedicada (`vicity_network`) para comunicación interna segura entre servicios.
-- [ ] **[IE5 - 100%] Healthchecks Activos:** Configurar verificación periódica de salud en el backend con `interval`, `timeout`, `retries` y `start_period`.
-- [ ] **[IE5 - 100%] Dependencia Condicional por Salud:** Configurar en el frontend `depends_on: backend: condition: service_healthy` para garantizar arranque en orden.
-- [ ] **[IE5 - 100%] Políticas de Resiliencia:** Incluir políticas de reinicio automático (`restart: unless-stopped`) y variables de entorno desacopladas.
-- [ ] **[IE4 - 100%] Job de Despliegue Automático (CD):** Agregar etapa de deploy en GitHub Actions que se ejecute solo si los tests y escaneos de seguridad pasaron exitosamente.
-- [ ] **[IE4 - 100%] Entorno Cloud Simulado:** Simular el despliegue automático levantando los contenedores en el runner de GitHub Actions y validando conectividad con un smoke test.
-- [ ] **[IE4 - 100%] Trazabilidad de Extremo a Extremo:** Registrar en los logs de despliegue el commit SHA (`$GITHUB_SHA`), tag semántico, rama y timestamp.
-- [ ] **[IE4 - 100%] Documentación de Trazabilidad y Calidad:** Explicar en el `README.md` cómo el pipeline asegura la trazabilidad desde el commit hasta el despliegue.
-- [ ] **[Formal] Reflexión Individual:** Redactar en el `README.md` su reflexión personal sin IA explicando su contribución en orquestación y CD.
+- [x] **[IE5 - 100%] Orquestación Multi-Servicio:** Definir en `docker-compose.yml` la coexistencia coordinada de `backend` y `frontend`.
+- [x] **[IE5 - 100%] Red Aislada (Bridge Network):** Crear red dedicada (`vicity_network`) para comunicación interna segura entre servicios.
+- [x] **[IE5 - 100%] Healthchecks Activos:** Configurar verificación periódica de salud en el backend con `interval: 15s`, `timeout: 5s`, `retries: 3` y `start_period: 10s`.
+- [x] **[IE5 - 100%] Dependencia Condicional por Salud:** Configurar en el frontend `depends_on: backend: condition: service_healthy` para garantizar arranque en orden.
+- [x] **[IE5 - 100%] Políticas de Resiliencia:** Incluir políticas de reinicio automático (`restart: unless-stopped`) y variables de entorno desacopladas.
+- [x] **[IE4 - 100%] Job de Despliegue Automático (CD):** Agregar etapa `deploy-simulated` en GitHub Actions condicionada al éxito de tests y Quality Gate.
+- [x] **[IE4 - 100%] Entorno Cloud Simulado:** Simular el despliegue automático levantando los contenedores en el runner de GitHub Actions y validando conectividad con un smoke test HTTP (`curl /api/health`).
+- [x] **[IE4 - 100%] Trazabilidad de Extremo a Extremo:** Registrar en los logs de despliegue el commit SHA (`$GITHUB_SHA`), rama (`$GITHUB_REF_NAME`), autor y timestamp UTC.
+- [x] **[IE4 - 100%] Documentación de Trazabilidad y Calidad:** Documentado en `README.md` y en `docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md`.
+- [x] **[Formal] Reflexión Individual:** Redactada en el `README.md` la reflexión personal sobre orquestación, resiliencia y CD.
+
 
 ---
 
