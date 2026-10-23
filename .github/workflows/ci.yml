@@ -122,7 +122,7 @@ jobs:
           echo "Se autoriza el avance a las etapas de empaquetado y despliegue."
 
   # =========================================================================
-  # FASE 3: CONTENERIZACIÓN DOCKER (IE1 - 20% - Responsable: Abner)
+  # FASE 3: CONTENERIZACIÓN DOCKER (IE1 - 20% - Responsable: Kevin)
   # =========================================================================
   docker-build:
     name: Construcción de Imágenes Docker

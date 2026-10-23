@@ -6,7 +6,7 @@ Bienvenido a la guía de colaboración del proyecto. Este documento define los e
 
 ## 1. Roles y Responsabilidades
 * **Alexsander Rosales**: Tech Lead & Security / CI Pipeline Core (Gobernanza de CI/CD, Dependabot, análisis SAST y Quality Gates).
-* **Abner**: Container & Testing Automation Engineer (Contenerización Multi-Stage en Docker, suite de pruebas y cobertura).
+* **Kevin**: Container & Testing Automation Engineer (Contenerización Multi-Stage en Docker, suite de pruebas y cobertura).
 * **Paulo Rivas**: DevOps & Orchestration Engineer (Orquestación con Docker Compose, despliegue continuo CD y documentación técnica).
 
 ---

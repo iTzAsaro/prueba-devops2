@@ -9,7 +9,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/
 ### Planificado / En progreso
 - Implementación de pipeline CI/CD avanzado en GitHub Actions con Quality Gates (Alexsander Rosales).
 - Configuración de escaneo de seguridad automatizado con Dependabot y análisis SAST (SonarCloud/Snyk).
-- Optimización de `Dockerfile` para Backend y Frontend mediante Multi-Stage Builds y usuario sin privilegios `USER node` (Abner).
+- Optimización de `Dockerfile` para Backend y Frontend mediante Multi-Stage Builds y usuario sin privilegios `USER node` (Kevin).
 - Orquestación con `docker-compose.yml` avanzada, incorporando dependencias ordenadas por `healthcheck` y red interna (Paulo Rivas).
 - Despliegue continuo automatizado en entorno simulado con trazabilidad semántica y commit SHA (Paulo Rivas).
 
