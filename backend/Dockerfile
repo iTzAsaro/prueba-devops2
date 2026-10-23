@@ -1,26 +1,21 @@
-# Etapa 1: Builder (Instalación limpia de dependencias de producción)
-FROM node:18-alpine AS builder
+# Build stage: install only the production dependency set deterministically.
+FROM node:20-alpine AS builder
 
 WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
 
-COPY package*.json ./
-# Asegura directorio node_modules para empaquetado determinista
-RUN mkdir -p /app/node_modules && (npm ci --omit=dev --ignore-scripts 2>/dev/null || true)
-
-# Etapa 2: Runtime de producción seguro y ligero (Non-root)
-FROM node:18-alpine
+# Runtime stage: no test files, coverage tooling, or development dependencies.
+FROM node:20-alpine AS production
 
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copiar dependencias optimizadas y código necesario
-COPY --from=builder /app/node_modules ./node_modules
-COPY src ./src
-COPY package.json ./
+COPY --from=builder --chown=node:node /app/package.json ./package.json
+COPY --from=builder --chown=node:node /app/package-lock.json ./package-lock.json
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node src ./src
 
-# Usuario sin privilegios
 USER node
-
 EXPOSE 3000
-
 CMD ["node", "src/server.js"]

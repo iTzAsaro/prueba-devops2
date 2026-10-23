@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ matrix.module }}/package.json
+          cache-dependency-path: ${{ matrix.module }}/package-lock.json
 
       - name: Instalar dependencias del ${{ matrix.module }}
         working-directory: ./${{ matrix.module }}
@@ -38,6 +38,19 @@ jobs:
       - name: Ejecutar Suite de Pruebas Unitarias (${{ matrix.module }})
         working-directory: ./${{ matrix.module }}
         run: npm test
+
+      - name: Generar cobertura LCOV (${{ matrix.module }})
+        working-directory: ./${{ matrix.module }}
+        run: npm run test:coverage
+
+      - name: Publicar cobertura (${{ matrix.module }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.module }}
+          path: ${{ matrix.module }}/coverage
+          if-no-files-found: error
+          retention-days: 14
 
   # =========================================================================
   # FASE 2: SEGURIDAD, SAST Y QUALITY GATE (IE3 - 20% - Responsable: Alex)
@@ -131,6 +144,15 @@ jobs:
         run: |
           echo "🐳 Construyendo imagen frontend..."
           docker build -t vicity-frontend:${{ github.sha }} ./frontend
+
+      - name: Verificar imágenes, usuario efectivo y metadatos
+        run: |
+          set -euo pipefail
+          docker image inspect vicity-backend:${{ github.sha }}
+          docker image inspect vicity-frontend:${{ github.sha }}
+          test "$(docker image inspect -f '{{.Config.User}}' vicity-backend:${{ github.sha }})" = "node"
+          test "$(docker image inspect -f '{{.Config.User}}' vicity-frontend:${{ github.sha }})" = "node"
+          docker image ls --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' | grep -E 'vicity-(backend|frontend)'
 
   # =========================================================================
   # FASE 4: DESPLIEGUE CONTINUO EN ENTORNO SIMULADO (IE4 & IE5 - Responsable: Paulo)

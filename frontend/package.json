@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test tests/frontend.test.js",
+    "test:coverage": "c8 --all --exclude=tests/** --exclude=node_modules/** --exclude=coverage/** --exclude=**/coverage/** --reporter=text --reporter=lcov npm test",
     "build": "echo 'Frontend build completed successfully'"
   },
   "keywords": [
@@ -14,5 +15,8 @@
     "gitflow"
   ],
   "author": "Equipo DevOps (Alex, Abner, Paulo)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "c8": "^12.0.0"
+  }
 }

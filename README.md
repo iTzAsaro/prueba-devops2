@@ -137,7 +137,18 @@ cd ../frontend
 npm test
 ```
 
-### 2. Levantamiento con Docker Compose (Orquestación Local)
+### 2. Cobertura de pruebas (IE2)
+
+Cada módulo conserva `npm test` y expone `npm run test:coverage`, que genera salida legible y LCOV mediante `c8`:
+
+```bash
+cd backend && npm run test:coverage
+cd ../frontend && npm run test:coverage
+```
+
+Los reportes quedan en `backend/coverage/lcov.info` y `frontend/coverage/lcov.info`. `coverage/` está excluido de Git y Docker.
+
+### 3. Levantamiento con Docker Compose (Orquestación Local)
 Para construir y levantar el stack completo en una red aislada con healthchecks activos:
 ```bash
 docker-compose up --build -d
@@ -157,8 +168,8 @@ docker-compose down
 
 | Indicador | Requisito Duoc UC | Implementación en este Repositorio | Estado |
 | :--- | :--- | :--- | :---: |
-| **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`. | ✅ Preparado |
-| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias ejecutadas automáticamente en el runner de GitHub Actions ante push y PR. | ✅ Activo |
+| **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`, builds locales y smoke tests validados. | ✅ Validado |
+| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias, cobertura LCOV con `c8` y artefactos configurados en GitHub Actions. | ✅ Validado localmente |
 | **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot, análisis SAST (SonarCloud/Snyk) y Quality Gate de bloqueo estricto ante vulnerabilidades. | ✅ 100% Configurado y Operativo |
 | **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job `deploy-simulated` en GitHub Actions, smoke test HTTP (`curl /api/health`), logs inmutables con `$GITHUB_SHA` y timestamp UTC. | ✅ 100% Configurado y Operativo |
 | **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con red bridge aislada (`vicity_network`), sondeo `healthcheck` y arranque sincronizado con `condition: service_healthy`. | ✅ 100% Configurado y Operativo |
@@ -166,6 +177,7 @@ docker-compose down
 > 📄 **Documentación y Evidencias Técnicas:**
 > * 🛡️ **Seguridad y CI (IE3 - Alex):** [**`docs/EVIDENCIAS_SONARCLOUD_Y_CI.md`**](./docs/EVIDENCIAS_SONARCLOUD_Y_CI.md)
 > * 🚀 **Despliegue y Orquestación (IE4 & IE5 - Paulo):** [**`docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md`**](./docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md)
+> * 🐳 **Evidencias IE1 e IE2 (Abner):** [**`docs/EVIDENCIAS_IE1_IE2_ABNER.md`**](./docs/EVIDENCIAS_IE1_IE2_ABNER.md)
 > * 📋 **Delegación de Tareas y Matriz Rúbrica:** [**`docs/DELEGACION_TAREAS_EP2.md`**](./docs/DELEGACION_TAREAS_EP2.md)
 
 ---
@@ -198,7 +210,7 @@ En cumplimiento con la política institucional de Duoc UC sobre el uso de tecnol
 > En esta segunda etapa del proyecto, mi responsabilidad principal radicó en robustecer la gobernanza y seguridad de nuestro pipeline CI/CD (IE3), transitando desde una automatización básica de pruebas hacia un modelo de DevSecOps integral. Diseñar e implementar el análisis de seguridad mediante Dependabot y herramientas SAST me permitió comprender cómo la detección temprana de vulnerabilidades previene riesgos críticos antes de que el código sea empaquetado o desplegado. Configurar la compuerta de calidad (Quality Gate) con bloqueo estricto fue uno de los mayores desafíos técnicos: garantizar que cualquier falla de seguridad o caída en los estándares de calidad detenga inmediatamente el pipeline (`fail-on-error`), protegiendo la estabilidad del entorno productivo. Adicionalmente, la activación de reglas de protección de rama en GitHub (`main` y `develop`) aseguró una colaboración disciplinada, donde cada cambio pasa forzosamente por revisión de pares y validación automática. Esta experiencia consolidó mi visión sobre la importancia de la seguridad como código y la automatización como pilares de la entrega continua moderna.
 
 ### 2. Reflexión de Abner (Container & Testing Automation Engineer)
-*(Espacio reservado para la reflexión personal de Abner)*
+> En esta nueva etapa trabajé en los indicadores IE1 e IE2, relacionados con Docker y las pruebas automatizadas. Actualicé los Dockerfiles para usar imágenes multi-stage con Node 20 Alpine, instalación determinista con `npm ci` y usuario no privilegiado `node`. También ejecuté las pruebas nativas del backend y frontend, obteniendo 10 y 9 pruebas aprobadas respectivamente. Agregué reportes de cobertura con `c8` y actualicé GitHub Actions para guardar estas evidencias. Después de iniciar Docker Desktop, pude construir y levantar los dos servicios con Compose, comprobando que el backend respondiera 200 en `/api/health`, el frontend respondiera 200 y que ambos contenedores utilizaran el usuario `node`. Con este trabajo aprendí la importancia de automatizar las pruebas y mantener contenedores seguros y reproducibles.
 
 ### 3. Reflexión de Paulo Rivas (DevOps & Orchestration Engineer)
 > En esta Evaluación Parcial 2, asumí el rol de DevOps & Orchestration Engineer con foco en los indicadores IE4 (Despliegue Continuo & Trazabilidad) e IE5 (Orquestación de Contenedores). Mi principal desafío fue diseñar una arquitectura de orquestación resiliente mediante Docker Compose que superara los problemas clásicos de condiciones de carrera en el arranque de microservicios. Implementé una red aislada bridge (`vicity_network`) y configuré sondeos de salud (`healthchecks`) activos en el backend con parámetros de timeout, retries e intervalos definidos, permitiendo que el frontend dependa estrictamente del estado saludable (`condition: service_healthy`). En la arista de despliegue continuo, automaticé la fase de CD en GitHub Actions dentro de un entorno cloud simulado, donde cada ejecución valida la salud del servicio mediante smoke tests y estampa un registro inmutable de auditoría con el commit SHA (`$GITHUB_SHA`), rama y timestamp UTC. La articulación con mis compañeros Alexsander y Abner me demostró el valor práctico de DevSecOps: cómo la integración de pruebas, escaneo SAST, compuertas de calidad y empaquetado seguro sientan las bases indispensables para un despliegue trazable y confiable en producción.

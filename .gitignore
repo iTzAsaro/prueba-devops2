@@ -5,11 +5,14 @@ __pycache__/
 venv/
 .env
 .env.local
+.env.*
+!.env.example
 
 # Build outputs
 dist/
 build/
 coverage/
+.nyc_output/
 
 # OS and Editor files
 .DS_Store
