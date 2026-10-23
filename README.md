@@ -16,7 +16,7 @@
 | Integrante | Rol en el Proyecto | Responsabilidad Principal en EP2 | Indicadores de Evaluación |
 | :--- | :--- | :--- | :--- |
 | **Alexsander Rosales** | **Tech Lead & Security / CI Pipeline Core** | Orquestación del pipeline GitHub Actions, configuración de Dependabot, integración de análisis SAST (SonarCloud/Snyk), Quality Gates de bloqueo estricto y revisión de PRs. | **IE3 (Seguridad & Calidad)** |
-| **Abner** | **Container & Testing Automation Engineer** | Optimización de `Dockerfile` con Multi-Stage builds, usuario no privilegiado (`USER node`), `.dockerignore`, suite de pruebas unitarias y reportes de cobertura en CI. | **IE1 (Docker) & IE2 (Testing)** |
+| **Kevin** | **Container & Testing Automation Engineer** | Optimización de `Dockerfile` con Multi-Stage builds, usuario no privilegiado (`USER node`), `.dockerignore`, suite de pruebas unitarias y reportes de cobertura en CI. | **IE1 (Docker) & IE2 (Testing)** |
 | **Paulo Rivas** | **DevOps & Orchestration Engineer** | Orquestación con `docker-compose.yml` (redes dedicadas, volúmenes, healthchecks), job de despliegue continuo (CD) en entorno simulado con trazabilidad y documentación técnica. | **IE4 (Despliegue) & IE5 (Orquestación)** |
 
 ---
@@ -95,11 +95,11 @@ flowchart TD
 │   │   └── server.js            # Servidor HTTP con healthcheck y métricas
 │   ├── tests/
 │   │   └── backend.test.js      # 10 Pruebas unitarias nativas (Node test runner)
-│   ├── Dockerfile               # Contenerización Multi-Stage (Abner)
+│   ├── Dockerfile               # Contenerización Multi-Stage (Kevin)
 │   ├── .dockerignore            # Exclusión de temporales y logs
 │   ├── package.json             # Scripts y metadatos
 │   └── README.md                # Documentación de endpoints
-├── frontend/                    # Cliente Web SPA Dark HUD (Abner)
+├── frontend/                    # Cliente Web SPA Dark HUD (Kevin)
 │   ├── public/                  # Shell HTML e iconos
 │   ├── src/                     # Componentes, vistas SPA, catálogo y store
 │   ├── tests/
@@ -177,7 +177,7 @@ docker-compose down
 > 📄 **Documentación y Evidencias Técnicas:**
 > * 🛡️ **Seguridad y CI (IE3 - Alex):** [**`docs/EVIDENCIAS_SONARCLOUD_Y_CI.md`**](./docs/EVIDENCIAS_SONARCLOUD_Y_CI.md)
 > * 🚀 **Despliegue y Orquestación (IE4 & IE5 - Paulo):** [**`docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md`**](./docs/EVIDENCIAS_DESPLIEGUE_Y_ORQUESTACION.md)
-> * 🐳 **Evidencias IE1 e IE2 (Abner):** [**`docs/EVIDENCIAS_IE1_IE2_ABNER.md`**](./docs/EVIDENCIAS_IE1_IE2_ABNER.md)
+> * 🐳 **Evidencias IE1 e IE2 (Kevin):** [**`docs/EVIDENCIAS_IE1_IE2_KEVIN.md`**](./docs/EVIDENCIAS_IE1_IE2_KEVIN.md)
 > * 📋 **Delegación de Tareas y Matriz Rúbrica:** [**`docs/DELEGACION_TAREAS_EP2.md`**](./docs/DELEGACION_TAREAS_EP2.md)
 
 ---
@@ -209,8 +209,8 @@ En cumplimiento con la política institucional de Duoc UC sobre el uso de tecnol
 ### 1. Reflexión de Alexsander Rosales (Tech Lead & Security / CI Core)
 > En esta segunda etapa del proyecto, mi responsabilidad principal radicó en robustecer la gobernanza y seguridad de nuestro pipeline CI/CD (IE3), transitando desde una automatización básica de pruebas hacia un modelo de DevSecOps integral. Diseñar e implementar el análisis de seguridad mediante Dependabot y herramientas SAST me permitió comprender cómo la detección temprana de vulnerabilidades previene riesgos críticos antes de que el código sea empaquetado o desplegado. Configurar la compuerta de calidad (Quality Gate) con bloqueo estricto fue uno de los mayores desafíos técnicos: garantizar que cualquier falla de seguridad o caída en los estándares de calidad detenga inmediatamente el pipeline (`fail-on-error`), protegiendo la estabilidad del entorno productivo. Adicionalmente, la activación de reglas de protección de rama en GitHub (`main` y `develop`) aseguró una colaboración disciplinada, donde cada cambio pasa forzosamente por revisión de pares y validación automática. Esta experiencia consolidó mi visión sobre la importancia de la seguridad como código y la automatización como pilares de la entrega continua moderna.
 
-### 2. Reflexión de Abner (Container & Testing Automation Engineer)
+### 2. Reflexión de Kevin (Container & Testing Automation Engineer)
 > En esta nueva etapa trabajé en los indicadores IE1 e IE2, relacionados con Docker y las pruebas automatizadas. Actualicé los Dockerfiles para usar imágenes multi-stage con Node 20 Alpine, instalación determinista con `npm ci` y usuario no privilegiado `node`. También ejecuté las pruebas nativas del backend y frontend, obteniendo 10 y 9 pruebas aprobadas respectivamente. Agregué reportes de cobertura con `c8` y actualicé GitHub Actions para guardar estas evidencias. Después de iniciar Docker Desktop, pude construir y levantar los dos servicios con Compose, comprobando que el backend respondiera 200 en `/api/health`, el frontend respondiera 200 y que ambos contenedores utilizaran el usuario `node`. Con este trabajo aprendí la importancia de automatizar las pruebas y mantener contenedores seguros y reproducibles.
 
 ### 3. Reflexión de Paulo Rivas (DevOps & Orchestration Engineer)
-> En esta Evaluación Parcial 2, asumí el rol de DevOps & Orchestration Engineer con foco en los indicadores IE4 (Despliegue Continuo & Trazabilidad) e IE5 (Orquestación de Contenedores). Mi principal desafío fue diseñar una arquitectura de orquestación resiliente mediante Docker Compose que superara los problemas clásicos de condiciones de carrera en el arranque de microservicios. Implementé una red aislada bridge (`vicity_network`) y configuré sondeos de salud (`healthchecks`) activos en el backend con parámetros de timeout, retries e intervalos definidos, permitiendo que el frontend dependa estrictamente del estado saludable (`condition: service_healthy`). En la arista de despliegue continuo, automaticé la fase de CD en GitHub Actions dentro de un entorno cloud simulado, donde cada ejecución valida la salud del servicio mediante smoke tests y estampa un registro inmutable de auditoría con el commit SHA (`$GITHUB_SHA`), rama y timestamp UTC. La articulación con mis compañeros Alexsander y Abner me demostró el valor práctico de DevSecOps: cómo la integración de pruebas, escaneo SAST, compuertas de calidad y empaquetado seguro sientan las bases indispensables para un despliegue trazable y confiable en producción.
+> En esta Evaluación Parcial 2, asumí el rol de DevOps & Orchestration Engineer con foco en los indicadores IE4 (Despliegue Continuo & Trazabilidad) e IE5 (Orquestación de Contenedores). Mi principal desafío fue diseñar una arquitectura de orquestación resiliente mediante Docker Compose que superara los problemas clásicos de condiciones de carrera en el arranque de microservicios. Implementé una red aislada bridge (`vicity_network`) y configuré sondeos de salud (`healthchecks`) activos en el backend con parámetros de timeout, retries e intervalos definidos, permitiendo que el frontend dependa estrictamente del estado saludable (`condition: service_healthy`). En la arista de despliegue continuo, automaticé la fase de CD en GitHub Actions dentro de un entorno cloud simulado, donde cada ejecución valida la salud del servicio mediante smoke tests y estampa un registro inmutable de auditoría con el commit SHA (`$GITHUB_SHA`), rama y timestamp UTC. La articulación con mis compañeros Alexsander y Kevin me demostró el valor práctico de DevSecOps: cómo la integración de pruebas, escaneo SAST, compuertas de calidad y empaquetado seguro sientan las bases indispensables para un despliegue trazable y confiable en producción.

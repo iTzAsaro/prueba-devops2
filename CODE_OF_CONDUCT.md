@@ -1,7 +1,7 @@
 # Código de Conducta para el Equipo
 
 ## 1. Nuestro Compromiso
-Como miembros del equipo de desarrollo y DevOps (Alexsander Rosales, Abner, Paulo Rivas), nos comprometemos a fomentar un entorno de trabajo colaborativo, respetuoso, inclusivo y libre de discriminación o acoso.
+Como miembros del equipo de desarrollo y DevOps (Alexsander Rosales, Kevin, Paulo Rivas), nos comprometemos a fomentar un entorno de trabajo colaborativo, respetuoso, inclusivo y libre de discriminación o acoso.
 
 ## 2. Normas de Comportamiento Esperadas
 Para promover un ambiente de colaboración efectivo, los integrantes del equipo se comprometen a:
