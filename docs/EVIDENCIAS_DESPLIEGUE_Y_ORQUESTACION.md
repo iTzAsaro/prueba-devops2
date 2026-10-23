@@ -36,7 +36,7 @@
 
 ## 2. IE5: Orquestación Multi-Contenedor Resiliente
 
-La arquitectura de la solución se desacopló en dos servicios independientes orquestados mediante [docker-compose.yml](file:///home/pauloriv/Documentos/prueba-devops2/docker-compose.yml):
+La arquitectura de la solución se desacopló en dos servicios independientes orquestados mediante [docker-compose.yml](../docker-compose.yml):
 * **`backend`:** API REST basada en Node.js que expone los endpoints de catálogo, órdenes y salud (`/api/health`).
 * **`frontend`:** Interfaz SPA servida mediante un servidor estático optimizado con Dark HUD.
 
@@ -97,7 +97,7 @@ A diferencia de un `depends_on` tradicional que sólo evalúa el arranque del pr
 
 ### 3.1 Integración en el Pipeline GitHub Actions
 
-El flujo de despliegue automatizado fue integrado en [.github/workflows/ci.yml](file:///home/pauloriv/Documentos/prueba-devops2/.github/workflows/ci.yml) bajo el job `deploy-simulated`:
+El flujo de despliegue automatizado fue integrado en [.github/workflows/ci.yml](../.github/workflows/ci.yml) bajo el job `deploy-simulated`:
 
 ```mermaid
 flowchart LR

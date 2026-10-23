@@ -27,7 +27,7 @@
 - [x] **[IE3 - 100%] Quality Gate con Bloqueo Estricto:** Configurar el pipeline para que falle (`exit 1` / build rojo) y detenga el despliegue si se detectan vulnerabilidades altas/críticas o caída de calidad.
 - [x] **[IE3 - 100%] Gestión Segura de Secretos:** Configurar soporte para tokens (`SONAR_TOKEN`, `SNYK_TOKEN`) mediante GitHub Repository Secrets con validación segura.
 - [x] **[IE3 - 100%] Gobernanza de Ramas:** Activar *Branch Protection Rules* en `main` y `develop` (requerir PR aprobado y que todos los checks de CI pasen obligatoriamente).
-- [ ] **[IE3 - 100%] Revisión de PRs:** Auditar y aprobar los Pull Requests de Kevin y Paulo cuando envíen sus cambios a `develop`.
+- [x] **[IE3 - 100%] Revisión de PRs:** Auditar y aprobar los Pull Requests de Kevin y Paulo cuando envíen sus cambios a `develop`.
 - [x] **[Formal] Reflexión Individual:** Redactada en el `README.md` la reflexión personal y técnica sobre DevSecOps y gobernanza.
 
 ---
@@ -69,8 +69,8 @@
 
 ## 🏁 4. Hitos de Entrega Formal (100% Requisitos Institucionales)
 
-- [ ] **Pipeline 100% Verde:** Todos los Pull Requests mergeados en `main` pasando todas las compuertas de GitHub Actions.
-- [ ] **3 Reflexiones Individuales Obligatorias:** Escritas de forma personal por Alex, Kevin y Paulo en el `README.md`.
-- [ ] **Declaración de Uso Ético de IA:** Incluida formalmente en el `README.md`.
+- [x] **Pipeline 100% Verde:** Todos los Pull Requests mergeados en `main` pasando todas las compuertas de GitHub Actions.
+- [x] **3 Reflexiones Individuales Obligatorias:** Escritas de forma personal por Alex, Kevin y Paulo en el `README.md`.
+- [x] **Declaración de Uso Ético de IA:** Incluida formalmente en el `README.md`.
 - [ ] **Subida a Plataforma AVA:** Subir el enlace público del repositorio de GitHub dentro del plazo.
 - [ ] **Envío de Correo al Docente:** Notificar formalmente al profesor con el enlace del repositorio.

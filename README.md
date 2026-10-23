@@ -3,8 +3,9 @@
 > **Asignatura:** DOY0101 - Ingeniería DevOps  
 > **Institución:** Duoc UC  
 > **Evaluación:** Evaluación Parcial 2 (45% ponderación)  
-> **Estado:** Base técnica configurada y lista para despliegue de pipeline CI/CD
+> **Estado:** Pipeline CI/CD 100% operativo, Quality Gate aprobado y despliegue simulado validado
 
+[![CI/CD Pipeline](https://github.com/iTzAsaro/prueba-devops2/actions/workflows/ci.yml/badge.svg)](https://github.com/iTzAsaro/prueba-devops2/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=iTzAsaro_prueba-devops2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=iTzAsaro_prueba-devops2)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=iTzAsaro_prueba-devops2&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=iTzAsaro_prueba-devops2)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=iTzAsaro_prueba-devops2&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=iTzAsaro_prueba-devops2)
