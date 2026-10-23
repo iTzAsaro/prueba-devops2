@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test tests/frontend.test.js",
-    "test:coverage": "c8 --all --exclude=tests/** --exclude=node_modules/** --reporter=text --reporter=lcov npm test",
+    "test:coverage": "c8 --all --exclude=tests/** --exclude=node_modules/** --exclude=coverage/** --exclude=**/coverage/** --reporter=text --reporter=lcov npm test",
     "build": "echo 'Frontend build completed successfully'"
   },
   "keywords": [

@@ -4,11 +4,11 @@
 **Proyecto:** Plataforma de Preventas VI CITY  
 **Responsable:** Abner Gallardo  
 **Rama de trabajo:** `feature/ie1-ie2-abner`  
-**Fecha de validación local:** 2026-10-23 UTC
+**Fecha de validación local:** 2026-10-23 UTC (actualización Docker)
 
 ## 1. Objetivo
 
-Este documento registra únicamente el trabajo de IE1 (contenedores) e IE2 (pruebas automatizadas) realizado sobre el repositorio existente. Se preservaron los trabajos de IE3, IE4 e IE5 y no se ejecutó ningún `push`, merge ni `reset --hard`.
+Este documento registra únicamente el trabajo de IE1 (contenedores) e IE2 (pruebas automatizadas) realizado sobre el repositorio existente. Se preservaron los trabajos de IE3, IE4 e IE5 y no se ejecutó ningún merge ni `reset --hard`. La rama de trabajo fue publicada en el fork y enviada al repositorio principal mediante el PR #5.
 
 - **IE1:** imágenes Docker multi-stage, reproducibles, ligeras y ejecutadas como usuario no root.
 - **IE2:** suites nativas `node:test`, cobertura LCOV y ejecución automatizada en GitHub Actions.
@@ -25,7 +25,7 @@ Este documento registra únicamente el trabajo de IE1 (contenedores) e IE2 (prue
 | Tests frontend | 9 tests, 9 aprobados, 0 fallidos |
 | Cobertura | No existían scripts `test:coverage` |
 | CI | Ejecutaba `npm test`, pero no generaba/subía cobertura ni verificaba usuario/tamaño de imágenes |
-| Docker daemon local | No disponible durante la validación: Docker Desktop Linux engine no estaba iniciado |
+| Docker daemon local | Disponible durante la validación final; Docker Desktop Linux engine iniciado |
 
 ## 3. Cambios realizados
 
@@ -123,8 +123,10 @@ docker image inspect -f '{{.Config.User}}' vicity-frontend:ie1
 
 - Evidencia de tests: salida local de `npm test` y `npm run test:coverage` registrada el 2026-10-23 UTC.
 - Reportes: `backend/coverage/lcov.info` y `frontend/coverage/lcov.info` generados localmente; no se versionan.
-- Evidencia Docker: bloqueada localmente porque el daemon `dockerDesktopLinuxEngine` no estaba iniciado. Los Dockerfiles sí fueron revisados para que CI falle si `npm ci`, `docker build`, `inspect` o la verificación de usuario falla.
-- Evidencia GitHub Actions remota: pendiente de una ejecución real; no se declara como aprobada en este documento.
+- Evidencia Docker: validada localmente con Docker Desktop Linux engine iniciado. Backend y frontend construyeron correctamente, Compose levantó ambos servicios, `/api/health` respondió HTTP 200 y el frontend respondió HTTP 200.
+- Evidencia de usuario: ambos contenedores ejecutaron como `uid=1000(node) gid=1000(node)`.
+- Tamaños reales: backend `48,381,342` bytes; frontend `48,401,627` bytes.
+- Evidencia GitHub Actions remota: queda pendiente de una ejecución real del workflow; no se declara como aprobada en este documento.
 
 ## 8. Tabla de cumplimiento rastreable
 
@@ -132,13 +134,14 @@ docker image inspect -f '{{.Config.User}}' vicity-frontend:ie1
 |---|---|---|
 | Dockerfiles multi-stage backend/frontend | Cumplido en código | `backend/Dockerfile`, `frontend/Dockerfile` |
 | Dependencias deterministas | Cumplido en código | `package-lock.json`, `npm ci --omit=dev` |
-| Runtime no root | Preparado; ejecución local bloqueada | `USER node`, verificación en workflow |
+| Runtime no root | Cumplido | `USER node`, `docker exec id`, uid 1000 |
 | Contextos Docker optimizados | Cumplido en código | `.dockerignore` de ambos módulos |
 | 10 tests backend | Cumplido | `backend/tests/backend.test.js`, 10/10 |
 | 9 tests frontend | Cumplido | `frontend/tests/frontend.test.js`, 9/9 |
 | Cobertura LCOV backend/frontend | Cumplido técnicamente | scripts y `coverage/lcov.info` |
 | Artefactos CI | Preparado; pendiente runner remoto | `.github/workflows/ci.yml` |
-| Builds Docker | Pendiente de daemon/runner | comando Docker y job `docker-build` |
+| Builds Docker | Cumplido localmente | `docker build`, `docker image inspect` |
+| Compose y smoke tests | Cumplido localmente | `docker compose up`, `/api/health` 200, frontend 200, `docker compose down` |
 | Compatibilidad IE3/IE4/IE5 | Preservada | jobs existentes y cambios acotados |
 
 ## 9. Problemas detectados y solución
@@ -146,7 +149,7 @@ docker image inspect -f '{{.Config.User}}' vicity-frontend:ie1
 1. Los Dockerfiles iniciales ocultaban fallas de `npm ci` con `|| true`; se eliminó ese patrón para que una dependencia inválida bloquee el build.
 2. No había script de cobertura; se añadió `c8` y reporte de texto + LCOV.
 3. La suite frontend no ejecuta lógica de navegador, por lo que su cobertura es 0%; se documenta honestamente y no se inventan pruebas.
-4. Docker Desktop no estaba iniciado en la máquina de validación. La construcción e inspección final deben ejecutarse cuando el daemon esté disponible o en GitHub Actions.
+4. Docker Desktop inicialmente no estaba iniciado en la máquina de validación. Se inició el motor Linux y se completaron los builds, la ejecución con Compose, los smoke tests y la verificación del usuario no root.
 
 ## 10. Reflexión personal
 
