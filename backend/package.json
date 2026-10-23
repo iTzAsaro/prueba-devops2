@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test tests/backend.test.js"
+    "test": "node --test tests/backend.test.js",
+    "test:coverage": "c8 --all --exclude=tests/** --exclude=node_modules/** --reporter=text --reporter=lcov npm test"
   },
   "keywords": [
     "devops",
@@ -14,5 +15,8 @@
     "gitflow"
   ],
   "author": "Alexsander Rosales",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "c8": "^12.0.0"
+  }
 }
