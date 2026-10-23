@@ -151,6 +151,20 @@ docker image inspect -f '{{.Config.User}}' vicity-frontend:ie1
 3. La suite frontend no ejecuta lógica de navegador, por lo que su cobertura es 0%; se documenta honestamente y no se inventan pruebas.
 4. Docker Desktop inicialmente no estaba iniciado en la máquina de validación. Se inició el motor Linux y se completaron los builds, la ejecución con Compose, los smoke tests y la verificación del usuario no root.
 
-## 10. Reflexión personal
+## 10. Verificación contra la meta de rúbrica de Abner
+
+| Criterio | Estado | Evidencia rastreable |
+|---|---|---|
+| IE1 — Dockerfile multi-stage backend con Alpine | ✅ Cumplido | `backend/Dockerfile`, etapas `builder` y `production`, `node:20-alpine` |
+| IE1 — Hardening con usuario no privilegiado | ✅ Cumplido | `USER node`; ejecución verificada con `uid=1000(node)` |
+| IE1 — Dockerfile multi-stage frontend | ✅ Cumplido | `frontend/Dockerfile`, etapas `builder` y `production`, `node:20-alpine` |
+| IE1 — Exclusión estricta con `.dockerignore` | ✅ Cumplido | `backend/.dockerignore`, `frontend/.dockerignore` |
+| IE1 — Job `docker-build` en GitHub Actions | ✅ Cumplido | `.github/workflows/ci.yml`, job `docker-build` y dos comandos `docker build` |
+| IE2 — Casos críticos backend | ✅ Cumplido | `backend/tests/backend.test.js`, 10/10 tests aprobados |
+| IE2 — Tests backend/frontend en CI | ✅ Configurado | `unit-tests` con matriz `[backend, frontend]`, triggers `push` y `pull_request` |
+| IE2 — Generación de cobertura | ✅ Cumplido | `test:coverage`, `c8`, LCOV y artefactos `coverage-backend`/`coverage-frontend` |
+| Formal — Reflexión individual | ✅ Incluida | Reflexión de Abner en `README.md` |
+
+## 11. Reflexión personal
 
 La reflexión de Abner debe ser redactada por el estudiante, sin IA. Guía: ¿Qué implementé? ¿Qué problema tuve? ¿Cómo lo resolví? ¿Qué aprendí?

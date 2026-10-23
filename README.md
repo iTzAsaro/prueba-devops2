@@ -168,8 +168,8 @@ docker-compose down
 
 | Indicador | Requisito Duoc UC | Implementación en este Repositorio | Estado |
 | :--- | :--- | :--- | :---: |
-| **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`, builds locales y smoke tests validados. | ✅ Validado |
-| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias, cobertura LCOV con `c8` y artefactos configurados en GitHub Actions. | ✅ Validado localmente |
+| **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`, builds locales y smoke tests validados. | ✅ 100% Cumplido |
+| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias, cobertura LCOV con `c8` y artefactos configurados en GitHub Actions. | ✅ 100% Cumplido |
 | **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot, análisis SAST (SonarCloud/Snyk) y Quality Gate de bloqueo estricto ante vulnerabilidades. | ✅ 100% Configurado y Operativo |
 | **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job `deploy-simulated` en GitHub Actions, smoke test HTTP (`curl /api/health`), logs inmutables con `$GITHUB_SHA` y timestamp UTC. | ✅ 100% Configurado y Operativo |
 | **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con red bridge aislada (`vicity_network`), sondeo `healthcheck` y arranque sincronizado con `condition: service_healthy`. | ✅ 100% Configurado y Operativo |
