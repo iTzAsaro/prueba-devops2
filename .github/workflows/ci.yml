@@ -22,7 +22,7 @@ jobs:
         module: [backend, frontend]
     steps:
       - name: Checkout del código fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar Node.js (LTS v20)
         uses: actions/setup-node@v4
@@ -63,7 +63,7 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout del código fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -130,7 +130,7 @@ jobs:
     needs: [security-audit]
     steps:
       - name: Checkout del código fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -163,7 +163,7 @@ jobs:
     needs: [docker-build]
     steps:
       - name: Checkout del código fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Levantar Servicios con Docker Compose
         run: |
