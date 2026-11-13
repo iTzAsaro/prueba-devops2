@@ -247,31 +247,17 @@ jobs:
           # Preparar directorio de la app en la instancia
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no "$USER_NAME@$EC2_HOST" "mkdir -p ~/app"
           
-          # Transferir archivos de orquestación y código fuente
-          scp -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no -r docker-compose.yml backend frontend "$USER_NAME@$EC2_HOST:~/app/"
+          # Transferir archivos fuente limpios empaquetados
+          tar --exclude='node_modules' --exclude='.git' -czf - docker-compose.yml backend frontend | ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no "$USER_NAME@$EC2_HOST" "tar -xzf - -C ~/app"
           
           # Construir y levantar servicios con Docker Compose en la nube
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no "$USER_NAME@$EC2_HOST" << 'EOF'
             set -e
             cd ~/app
             
-            # Instalar Docker y Compose si no están instalados
-            if ! command -v docker >/dev/null 2>&1; then
-              echo "🐳 Instalando Docker en la instancia AWS..."
-              if command -v dnf >/dev/null 2>&1; then
-                sudo dnf install -y docker
-              elif command -v yum >/dev/null 2>&1; then
-                sudo yum install -y docker
-              elif command -v apt-get >/dev/null 2>&1; then
-                sudo apt-get update && sudo apt-get install -y docker.io docker-compose-plugin
-              fi
-              sudo systemctl enable --now docker
-              sudo usermod -aG docker $USER || true
-            fi
-            
             echo "🚀 Levantando clúster multi-contenedor en AWS EC2..."
-            docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
-            docker compose up --build -d || docker-compose up --build -d
+            docker compose down 2>/dev/null || true
+            docker compose up --build -d
             
             echo "⏳ Esperando estabilización de servicios..."
             sleep 8
@@ -281,10 +267,10 @@ jobs:
       - name: Smoke Test en Vivo en AWS EC2
         if: steps.check-secrets.outputs.configured == 'true'
         run: |
-          echo "🔍 Ejecutando verificación de salud en http://$EC2_HOST:3000/api/health..."
+          echo "🔍 Ejecutando verificación de salud en http://$EC2_HOST/api/health..."
           SUCCESS=0
           for i in {1..6}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST:3000/api/health" || true)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST/api/health" || curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST:3000/api/health" || true)
             echo "Intento $i: HTTP $STATUS"
             if [ "$STATUS" -eq 200 ]; then
               SUCCESS=1
@@ -295,8 +281,11 @@ jobs:
           done
           
           if [ $SUCCESS -eq 0 ]; then
-            echo "⚠️ El backend tardó en responder o el Security Group de AWS no tiene los puertos 3000/5000 abiertos."
+            echo "⚠️ El backend tardó en responder. Verificando frontend..."
           fi
+          
+          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST/" || curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST:5000/" || true)
+          echo "Frontend en la nube (HTTP $FRONTEND_STATUS)"
 
       - name: Registrar Trazabilidad del Despliegue Cloud (IE4)
         if: steps.check-secrets.outputs.configured == 'true'

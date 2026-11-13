@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const PORT = process.env.PORT || 5000;
+const BACKEND_URL = process.env.BACKEND_URL;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SRC_DIR = path.join(__dirname, 'src');
 
@@ -81,6 +82,30 @@ function resolveStaticFile (relativePath) {
 }
 
 const server = http.createServer((req, res) => {
+  // Proxy inverso hacia la API Backend cuando BACKEND_URL está definido
+  if (BACKEND_URL && req.url && req.url.startsWith('/api')) {
+    try {
+      const targetUrl = new URL(req.url, BACKEND_URL);
+      const proxyReq = http.request(targetUrl, {
+        method: req.method,
+        headers: { ...req.headers, host: targetUrl.host }
+      }, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+      });
+      proxyReq.on('error', () => {
+        res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: 'Bad Gateway - Backend unreachable' }));
+      });
+      req.pipe(proxyReq);
+      return;
+    } catch {
+      res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('500 Internal Proxy Error');
+      return;
+    }
+  }
+
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, { 'Content-Type': 'text/plain; charset=utf-8', Allow: 'GET, HEAD' });
     res.end('405 Method Not Allowed - Frontend Server');
