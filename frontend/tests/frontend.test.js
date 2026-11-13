@@ -76,6 +76,30 @@ describe('Pruebas Unitarias del Módulo Frontend - VI CITY (Kevin)', () => {
     assert.match(content, /if\s*\(typeof v !== 'string'\)\s*return false;/, 'validateEmail debe verificar tipo string');
     assert.match(content, /if\s*\(!v \|\| typeof v !== 'string'\)\s*return false;/, 'validateCardNumber debe ser seguro');
   });
+
+  test('Componente Hero: renderHero debe generar estructura HTML y montar controladores', async () => {
+    const { renderHero } = await import('../src/components/hero.js');
+    assert.strictEqual(typeof renderHero, 'function', 'renderHero debe ser una función');
+    const mount = renderHero();
+    assert.strictEqual(typeof mount, 'function', 'renderHero debe retornar función mount');
+
+    const listeners = {};
+    const mockEl = {
+      innerHTML: '',
+      addEventListener: (evt, cb) => { listeners[evt] = cb; }
+    };
+    let injectedHtml = '';
+    const mockRoot = {
+      insertAdjacentHTML: (pos, html) => { injectedHtml = html; },
+      querySelector: () => mockEl
+    };
+    globalThis.window = { location: { hash: '' } };
+
+    const stop = mount(mockRoot);
+    assert.match(injectedHtml, /hero__title/, 'El HTML generado debe contener el título del Hero');
+    assert.match(injectedHtml, /hero__platforms/, 'El HTML generado debe contener las plataformas');
+    if (typeof stop === 'function') stop();
+  });
 });
 
 describe('Servidor HTTP del Frontend — entrega de assets estáticos', () => {
