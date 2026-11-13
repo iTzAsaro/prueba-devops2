@@ -35,4 +35,5 @@ services:
       - ./frontend/server.js:/app/server.js
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+    command: ["node", "--watch", "server.js"]
     init: true
