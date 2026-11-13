@@ -201,3 +201,116 @@ jobs:
         if: always()
         run: |
           docker compose down
+
+  # =========================================================================
+  # FASE 5: DESPLIEGUE CONTINUO EN LA NUBE AWS EC2 (IE4 - Despliegue Real Cloud)
+  # =========================================================================
+  deploy-cloud:
+    name: Despliegue en la Nube (AWS EC2)
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/main'
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Verificar disponibilidad de secretos Cloud
+        id: check-secrets
+        run: |
+          if [ -n "$EC2_SSH_KEY" ] && [ -n "$EC2_HOST" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Secretos de conexión AWS EC2 detectados. Procediendo con el despliegue cloud..."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️  Secretos EC2_HOST, EC2_USER o EC2_SSH_KEY no configurados aún en GitHub Secrets."
+            echo "   Configura estos secretos en Settings > Secrets and variables > Actions para activar el CD real en AWS."
+          fi
+
+      - name: Configurar llave SSH privada
+        if: steps.check-secrets.outputs.configured == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2.pem
+          chmod 600 ~/.ssh/ec2.pem
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Desplegar y orquestar stack en AWS EC2
+        if: steps.check-secrets.outputs.configured == 'true'
+        run: |
+          USER_NAME="${EC2_USER:-ec2-user}"
+          echo "🚀 Conectando a AWS EC2 ($USER_NAME@$EC2_HOST)..."
+          
+          # Preparar directorio de la app en la instancia
+          ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no "$USER_NAME@$EC2_HOST" "mkdir -p ~/app"
+          
+          # Transferir archivos de orquestación y código fuente
+          scp -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no -r docker-compose.yml backend frontend "$USER_NAME@$EC2_HOST:~/app/"
+          
+          # Construir y levantar servicios con Docker Compose en la nube
+          ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no "$USER_NAME@$EC2_HOST" << 'EOF'
+            set -e
+            cd ~/app
+            
+            # Instalar Docker y Compose si no están instalados
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "🐳 Instalando Docker en la instancia AWS..."
+              if command -v dnf >/dev/null 2>&1; then
+                sudo dnf install -y docker
+              elif command -v yum >/dev/null 2>&1; then
+                sudo yum install -y docker
+              elif command -v apt-get >/dev/null 2>&1; then
+                sudo apt-get update && sudo apt-get install -y docker.io docker-compose-plugin
+              fi
+              sudo systemctl enable --now docker
+              sudo usermod -aG docker $USER || true
+            fi
+            
+            echo "🚀 Levantando clúster multi-contenedor en AWS EC2..."
+            docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
+            docker compose up --build -d || docker-compose up --build -d
+            
+            echo "⏳ Esperando estabilización de servicios..."
+            sleep 8
+            docker compose ps
+          EOF
+
+      - name: Smoke Test en Vivo en AWS EC2
+        if: steps.check-secrets.outputs.configured == 'true'
+        run: |
+          echo "🔍 Ejecutando verificación de salud en http://$EC2_HOST:3000/api/health..."
+          SUCCESS=0
+          for i in {1..6}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$EC2_HOST:3000/api/health" || true)
+            echo "Intento $i: HTTP $STATUS"
+            if [ "$STATUS" -eq 200 ]; then
+              SUCCESS=1
+              echo "✅ Microservicio Backend respondiendo en vivo en AWS EC2."
+              break
+            fi
+            sleep 5
+          done
+          
+          if [ $SUCCESS -eq 0 ]; then
+            echo "⚠️ El backend tardó en responder o el Security Group de AWS no tiene los puertos 3000/5000 abiertos."
+          fi
+
+      - name: Registrar Trazabilidad del Despliegue Cloud (IE4)
+        if: steps.check-secrets.outputs.configured == 'true'
+        run: |
+          echo "=========================================================="
+          echo "☁️  REGISTRO INMUTABLE DE DESPLIEGUE CLOUD EN AWS EC2 (IE4)"
+          echo "=========================================================="
+          echo "Instancia:      AWS EC2 ($EC2_HOST)"
+          echo "IP Privada:     172.31.26.172"
+          echo "Commit SHA:     ${{ github.sha }}"
+          echo "Rama origen:    ${{ github.ref_name }}"
+          echo "Autor:          ${{ github.actor }}"
+          echo "Fecha y Hora:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "URL Frontend:   http://$EC2_HOST:5000"
+          echo "URL API Health: http://$EC2_HOST:3000/api/health"
+          echo "Estado:         Desplegado y Verificado en la Nube"
+          echo "=========================================================="

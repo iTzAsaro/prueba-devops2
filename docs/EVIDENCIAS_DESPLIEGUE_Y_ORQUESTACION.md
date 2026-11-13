@@ -129,6 +129,15 @@ fi
 
 Esto certifica que la aplicación no sólo se empaquetó, sino que es capaz de recibir y responder tráfico de red real de extremo a extremo en un entorno idéntico a un nodo cloud.
 
+### 3.3 Despliegue en la Nube Real (AWS EC2 - Fase 5)
+
+Adicionalmente a la simulación en el runner, el pipeline cuenta con el job `deploy-cloud` para despliegue automatizado directo sobre la instancia **AWS EC2**:
+* **Dirección IPv4 Pública:** `18.234.173.126` (puertos 3000 para API y 5000 para SPA)
+* **Dirección IPv4 Privada:** `172.31.26.172` (segmento VPC interno)
+* **Protocolo de Entrega:** Túnel SSH seguro con llave PEM inyectada desde GitHub Secrets (`EC2_SSH_KEY`).
+* **Sincronización:** Transferencia de artefactos de orquestación y arranque autónomo con `docker compose up --build -d`.
+* **Sondeo de Calidad:** Verificación HTTP remota activa (`/api/health`) y registro de auditoría con commit SHA en la nube.
+
 ---
 
 ## 4. IE4: Trazabilidad Inmutable de Extremo a Extremo

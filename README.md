@@ -68,13 +68,22 @@ flowchart TD
             CD --> DC --> HC
         end
 
+        subgraph Stage5 ["Fase 5: Despliegue Cloud en AWS EC2 (IE4)"]
+            EC2["Conexión SSH a AWS EC2 (18.234.173.126)"]
+            DCC["Orquestación remota Docker Compose"]
+            HCC["Smoke Test en la Nube (/api/health)"]
+            EC2 --> DCC --> HCC
+        end
+
         Stage1 --> Stage2
         QG -- Superado --> Stage3
         QG -- Falló --> Fail["🛑 Pipeline Bloqueado / Alerta de Seguridad"]
         Stage3 --> Stage4
+        Stage3 --> Stage5
     end
 
     HC --> Success(["🚀 Despliegue Validado & Trazable"])
+    HCC --> Success
 ```
 
 ---
