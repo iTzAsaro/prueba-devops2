@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Hook post-commit: ejecutado tras crear un commit localmente
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/sync-docker.sh"

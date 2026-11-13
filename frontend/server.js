@@ -6,6 +6,10 @@ const PORT = process.env.PORT || 5000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SRC_DIR = path.join(__dirname, 'src');
 
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+// En desarrollo no se cachea para que un cambio se vea al recargar el navegador.
+const CACHE_CONTROL = IS_PRODUCTION ? 'public, max-age=3600' : 'no-cache';
+
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -13,43 +17,108 @@ const MIME_TYPES = {
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml'
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2'
 };
 
+/**
+ * Convierte una URL en una ruta relativa segura.
+ * Devuelve null si la petición intenta salir de los directorios permitidos
+ * o si la codificación es inválida.
+ */
+function toSafeRelativePath (rawUrl) {
+  let pathname;
+
+  try {
+    pathname = decodeURIComponent((rawUrl || '/').split('?')[0].split('#')[0]);
+  } catch {
+    return null; // URI malformada (por ejemplo %E0)
+  }
+
+  if (pathname.includes('\0')) return null;
+
+  // Quita las barras iniciales: path.join() descartaría la base si la ruta es absoluta.
+  const stripped = pathname.replace(/^[/\\]+/, '');
+  if (stripped === '') return 'index.html';
+
+  const normalized = path.normalize(stripped);
+  if (normalized === '..' || normalized.startsWith(`..${path.sep}`) || path.isAbsolute(normalized)) {
+    return null;
+  }
+
+  return normalized;
+}
+
+function isServableFile (filePath, baseDir) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedFile = path.resolve(filePath);
+
+  if (resolvedFile !== resolvedBase && !resolvedFile.startsWith(resolvedBase + path.sep)) {
+    return false;
+  }
+
+  try {
+    return fs.statSync(resolvedFile).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resuelve un archivo estático: primero public/ y luego src/,
+ * que es donde viven los módulos ES y los estilos del SPA.
+ */
+function resolveStaticFile (relativePath) {
+  const fromPublic = path.join(PUBLIC_DIR, relativePath);
+  if (isServableFile(fromPublic, PUBLIC_DIR)) return fromPublic;
+
+  const fromSrc = path.join(SRC_DIR, relativePath);
+  if (isServableFile(fromSrc, SRC_DIR)) return fromSrc;
+
+  return null;
+}
+
 const server = http.createServer((req, res) => {
-  let relativePath = req.url === '/' ? 'index.html' : req.url;
-
-  // Limpiar query params si los hay
-  relativePath = relativePath.split('?')[0];
-
-  // Sanitización estricta contra Path Traversal
-  const safeSuffix = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
-  let filePath = path.resolve(PUBLIC_DIR, safeSuffix);
-
-  // Asegurar que no se escape de los directorios permitidos
-  const isInsidePublic = filePath.startsWith(PUBLIC_DIR);
-  const isInsideSrc = filePath.startsWith(SRC_DIR);
-
-  if (!isInsidePublic || !fs.existsSync(filePath)) {
-    filePath = path.resolve(SRC_DIR, safeSuffix);
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405, { 'Content-Type': 'text/plain; charset=utf-8', Allow: 'GET, HEAD' });
+    res.end('405 Method Not Allowed - Frontend Server');
+    return;
   }
 
-  const validPath = (filePath.startsWith(PUBLIC_DIR) || filePath.startsWith(SRC_DIR)) &&
-                    fs.existsSync(filePath) &&
-                    fs.statSync(filePath).isFile();
+  const relativePath = toSafeRelativePath(req.url);
+  const filePath = relativePath ? resolveStaticFile(relativePath) : null;
 
-  if (validPath) {
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'text/plain';
-    res.writeHead(200, { 'Content-Type': contentType });
-    fs.createReadStream(filePath).pipe(res);
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 Not Found - Frontend Server');
+  if (!filePath) {
+    res.writeHead(relativePath ? 404 : 400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end(relativePath ? '404 Not Found - Frontend Server' : '400 Bad Request - Frontend Server');
+    return;
   }
+
+  const ext = path.extname(filePath).toLowerCase();
+  res.writeHead(200, {
+    'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+    'Cache-Control': CACHE_CONTROL,
+    'X-Content-Type-Options': 'nosniff'
+  });
+
+  if (req.method === 'HEAD') {
+    res.end();
+    return;
+  }
+
+  const stream = fs.createReadStream(filePath);
+  stream.on('error', () => res.destroy());
+  stream.pipe(res);
 });
 
-server.listen(PORT, () => {
-  console.log(`[Frontend] Servidor web iniciado en http://localhost:${PORT}`);
-  console.log(`[Frontend] Plataforma VI CITY - Módulo Frontend`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`[Frontend] Servidor web iniciado en http://localhost:${PORT}`);
+    console.log(`[Frontend] Plataforma VI CITY - Módulo Frontend`);
+    console.log(`[Frontend] Entorno: ${process.env.NODE_ENV || 'development'} | Cache: ${CACHE_CONTROL}`);
+  });
+}
+
+module.exports = server;

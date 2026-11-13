@@ -1,0 +1,38 @@
+# ============================================================
+# Overlay de DESARROLLO — recarga en vivo mediante bind mounts.
+#
+# Uso:
+#   npm run dev
+#   # equivalente a:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Los puertos, la red y los healthchecks se heredan de docker-compose.yml.
+# Este archivo NO se usa en CI: el pipeline sigue construyendo las imágenes
+# de producción con docker-compose.yml.
+# ============================================================
+
+services:
+  backend:
+    environment:
+      PORT: "3000"
+      NODE_ENV: development
+    # El código del host se monta dentro del contenedor: editar y guardar basta.
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/tests:/app/tests
+    # --watch-path vigila el directorio: detecta también guardados atómicos,
+    # que reemplazan el inode del archivo y rompen --watch.
+    command: ["node", "--watch-path=src", "src/server.js"]
+    init: true
+
+  frontend:
+    environment:
+      PORT: "5000"
+      NODE_ENV: development
+      BACKEND_URL: http://backend:3000
+    # server.js se lee del host en cada arranque; src/ y public/ en cada request.
+    volumes:
+      - ./frontend/server.js:/app/server.js
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    init: true

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Hook post-rewrite: ejecutado tras 'git commit --amend' o rebase
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/sync-docker.sh"

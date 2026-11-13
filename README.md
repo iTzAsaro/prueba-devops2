@@ -133,7 +133,7 @@ Ambas suites utilizan el motor nativo de pruebas de Node.js, ejecutándose sin d
 cd backend
 npm test
 
-# Probar la interfaz Frontend (9 pruebas)
+# Probar la interfaz Frontend (14 pruebas)
 cd ../frontend
 npm test
 ```
@@ -150,17 +150,58 @@ cd ../frontend && npm run test:coverage
 Los reportes quedan en `backend/coverage/lcov.info` y `frontend/coverage/lcov.info`. `coverage/` está excluido de Git y Docker.
 
 ### 3. Levantamiento con Docker Compose (Orquestación Local)
-Para construir y levantar el stack completo en una red aislada con healthchecks activos:
+
+#### 3.1 Modo producción (imágenes inmutables)
+
+Construye las imágenes desde los `Dockerfile` y levanta el stack en una red aislada con healthchecks activos:
+
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
+
 * **Frontend:** Disponible en `http://localhost:5000`
 * **Backend API:** Disponible en `http://localhost:3000/api`
 * **Healthcheck:** Verificar estado en `http://localhost:3000/api/health`
 
-Para detener los servicios:
+En este modo el código queda **horneado dentro de la imagen** (`COPY` en el `Dockerfile`). Si modificas un archivo, debes reconstruir:
+
 ```bash
-docker-compose down
+docker compose up --build -d
+```
+
+#### 3.2 Modo desarrollo (recarga en vivo)
+
+Para iterar sin reconstruir imágenes, el overlay `docker-compose.dev.yml` monta el código del host dentro de los contenedores:
+
+```bash
+npm run dev        # primer plano, con logs
+npm run dev:up     # en segundo plano
+```
+
+Equivale a:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+| Servicio | Montaje | Efecto |
+| :--- | :--- | :--- |
+| **Frontend** | `./frontend/src` → `/app/src` | Los módulos ES y el CSS se leen del disco en cada request: guardas y recargas el navegador |
+| **Frontend** | `./frontend/public` → `/app/public` | `index.html` se sirve actualizado |
+| **Frontend** | `./frontend/server.js` → `/app/server.js` | Cambios en el servidor estático requieren `docker compose restart frontend` |
+| **Backend** | `./backend/src` → `/app/src` | `node --watch` reinicia el proceso automáticamente al guardar |
+
+En desarrollo el servidor envía `Cache-Control: no-cache`, de modo que el navegador no muestra versiones antiguas.
+
+El pipeline de CI **no** usa este overlay: sigue construyendo y validando las imágenes de producción con `docker-compose.yml` (IE1 e IE4).
+
+#### 3.3 Comandos útiles
+
+```bash
+npm run ps         # estado de los servicios
+npm run logs       # logs en streaming
+npm run smoke      # healthcheck + frontend en una línea
+npm run down       # detener el stack
 ```
 
 ---
@@ -170,7 +211,7 @@ docker-compose down
 | Indicador | Requisito Duoc UC | Implementación en este Repositorio | Estado |
 | :--- | :--- | :--- | :---: |
 | **IE1 (20%)** | Contenerización optimizada con Dockerfile | `Dockerfile` Multi-Stage en backend y frontend, imágenes ligeras Alpine, usuario sin privilegios `USER node`, builds locales y smoke tests validados. | ✅ 100% Cumplido |
-| **IE2 (20%)** | Pruebas automatizadas en CI | 19 pruebas unitarias, cobertura LCOV con `c8` y artefactos configurados en GitHub Actions. | ✅ 100% Cumplido |
+| **IE2 (20%)** | Pruebas automatizadas en CI | 24 pruebas unitarias, cobertura LCOV con `c8` y artefactos configurados en GitHub Actions. | ✅ 100% Cumplido |
 | **IE3 (20%)** | Seguridad, SAST y Quality Gates | Configuración de Dependabot, análisis SAST (SonarCloud/Snyk) y Quality Gate de bloqueo estricto ante vulnerabilidades. | ✅ 100% Configurado y Operativo |
 | **IE4 (20%)** | Despliegue automático simulado y trazabilidad | Job `deploy-simulated` en GitHub Actions, smoke test HTTP (`curl /api/health`), logs inmutables con `$GITHUB_SHA` y timestamp UTC. | ✅ 100% Configurado y Operativo |
 | **IE5 (20%)** | Orquestación de contenedores | `docker-compose.yml` multi-servicio con red bridge aislada (`vicity_network`), sondeo `healthcheck` y arranque sincronizado con `condition: service_healthy`. | ✅ 100% Configurado y Operativo |
@@ -188,7 +229,7 @@ docker-compose down
 Para cumplir con el estándar exigido por Duoc UC, la trazabilidad del pipeline se garantiza mediante una cadena ininterrumpida de validaciones:
 
 1. **Trazabilidad de Código a Artefacto:** Cada compilación de imagen Docker y ejecución de despliegue se vincula de forma unívoca con el hash SHA del commit (`$GITHUB_SHA`) y la rama de trabajo (`$GITHUB_REF_NAME`), evitando desalineaciones entre el código fuente auditado y los contenedores desplegados.
-2. **Puertas de Enlace de Calidad (Quality Gates):** Ningún contenedor es desplegado en el entorno simulado sin haber superado previamente las 19 pruebas unitarias automatizadas y el análisis estático SAST de SonarCloud con cero vulnerabilidades críticas o altas.
+2. **Puertas de Enlace de Calidad (Quality Gates):** Ningún contenedor es desplegado en el entorno simulado sin haber superado previamente las 24 pruebas unitarias automatizadas y el análisis estático SAST de SonarCloud con cero vulnerabilidades críticas o altas.
 3. **Validación Funcional en Vivo (Smoke Test):** Tras levantar los microservicios con Docker Compose, el pipeline ejecuta una prueba de humo activa verificando que el endpoint `/api/health` devuelva código `HTTP 200` y metadatos de disponibilidad válidos.
 4. **Auditoría Inmutable:** Cada paso de despliegue escribe en los logs del pipeline un registro inmutable con el commit SHA, autor, entorno y marca temporal UTC, permitiendo auditoría retrospectiva de cada versión entregada.
 

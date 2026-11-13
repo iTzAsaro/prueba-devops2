@@ -1,0 +1,19 @@
+{
+  "name": "vicity-devops-stack",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Orquestación local del stack VI CITY (EP2 DevOps - DOY0101)",
+  "scripts": {
+    "dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "dev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d",
+    "prod:up": "docker compose up --build -d",
+    "down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "logs": "docker compose logs -f",
+    "ps": "docker compose ps",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "coverage": "npm --prefix backend run test:coverage && npm --prefix frontend run test:coverage",
+    "smoke": "curl -fsS http://localhost:3000/api/health && echo && curl -fsS -o /dev/null -w 'frontend: HTTP %{http_code}\\n' http://localhost:5000/",
+    "setup:hooks": "git config core.hooksPath .githooks && chmod +x .githooks/*",
+    "prepare": "git config core.hooksPath .githooks || true"
+  }
+}

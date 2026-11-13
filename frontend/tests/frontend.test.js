@@ -1,4 +1,4 @@
-const { test, describe } = require('node:test');
+const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -75,5 +75,67 @@ describe('Pruebas Unitarias del Módulo Frontend - VI CITY (Kevin)', () => {
     const content = fs.readFileSync(uiPath, 'utf8');
     assert.match(content, /if\s*\(typeof v !== 'string'\)\s*return false;/, 'validateEmail debe verificar tipo string');
     assert.match(content, /if\s*\(!v \|\| typeof v !== 'string'\)\s*return false;/, 'validateCardNumber debe ser seguro');
+  });
+});
+
+describe('Servidor HTTP del Frontend — entrega de assets estáticos', () => {
+  // Regresión: el servidor sólo respondía "/" y devolvía 404 para app.js y
+  // style.css, por lo que la SPA quedaba en blanco en cualquier entorno.
+  const server = require('../server');
+  let baseUrl;
+
+  before(async () => {
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    baseUrl = `http://127.0.0.1:${server.address().port}`;
+  });
+
+  after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+  });
+
+  test('GET / debe entregar index.html del SPA', async () => {
+    const res = await fetch(`${baseUrl}/`);
+    const body = await res.text();
+
+    assert.strictEqual(res.status, 200);
+    assert.match(res.headers.get('content-type') || '', /text\/html/);
+    assert.match(body, /id="app"/);
+  });
+
+  test('Debe servir los assets que index.html referencia (app.js, style.css y módulos)', async () => {
+    const assets = [
+      ['/app.js', /application\/javascript/],
+      ['/style.css', /text\/css/],
+      ['/router.js', /application\/javascript/],
+      ['/components/hero.js', /application\/javascript/],
+      ['/pages/home.js', /application\/javascript/]
+    ];
+
+    for (const [asset, expectedType] of assets) {
+      const res = await fetch(`${baseUrl}${asset}`);
+      assert.strictEqual(res.status, 200, `${asset} debe responder 200`);
+      assert.match(res.headers.get('content-type') || '', expectedType, `${asset} debe declarar su Content-Type`);
+    }
+  });
+
+  test('Debe responder 404 en rutas inexistentes', async () => {
+    const res = await fetch(`${baseUrl}/no-existe.html`);
+    assert.strictEqual(res.status, 404);
+  });
+
+  test('Debe bloquear intentos de path traversal fuera de public/ y src/', async () => {
+    const res = await fetch(`${baseUrl}/..%2Fpackage.json`);
+    assert.notStrictEqual(res.status, 200, 'No debe exponer archivos fuera de los directorios permitidos');
+
+    const body = await res.text();
+    assert.doesNotMatch(body, /devops-microservice-frontend/);
+  });
+
+  test('Debe responder HEAD sin cuerpo y 405 para métodos no permitidos', async () => {
+    const head = await fetch(`${baseUrl}/style.css`, { method: 'HEAD' });
+    assert.strictEqual(head.status, 200);
+
+    const post = await fetch(`${baseUrl}/style.css`, { method: 'POST' });
+    assert.strictEqual(post.status, 405);
   });
 });

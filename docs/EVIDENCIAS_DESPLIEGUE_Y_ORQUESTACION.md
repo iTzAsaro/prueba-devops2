@@ -112,7 +112,7 @@ flowchart LR
     end
 ```
 
-* **Compuertas Previas Estrictas (`needs: [docker-build]`):** El despliegue sólo se ejecuta si el código superó el 100% de las pruebas unitarias (19/19), el escaneo SAST de SonarCloud y la construcción multi-stage de las imágenes.
+* **Compuertas Previas Estrictas (`needs: [docker-build]`):** El despliegue sólo se ejecuta si el código superó el 100% de las pruebas unitarias (24/24), el escaneo SAST de SonarCloud y la construcción multi-stage de las imágenes.
 
 ### 3.2 Validación Automatizada con Smoke Test
 
